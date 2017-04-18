@@ -6,14 +6,14 @@ import matplotlib.pyplot as plt
 
 # TODO: input,work, output
 # TODO: ^ make a more descriptive todo
-ITERATIONS = 10
+ITERATIONS = 100
 LEARNINGRATE = 0.0000001
 
 
 def main():
     (testData_x, testData_y, trainData_x, trainData_y) = importing_data()
-    # part_one(testData_x, testData_y, trainData_x, trainData_y)
-    part_two(testData_x, testData_y, trainData_x, trainData_y)
+    part_one(testData_x, testData_y, trainData_x, trainData_y)
+    # part_two(testData_x, testData_y, trainData_x, trainData_y)
 
 
 
@@ -66,6 +66,7 @@ def batchLogisticRegression(x, y, lr):
         # Break after j iterations
         if(j >= ITERATIONS):
             break;
+    print w
     return w
 
 def batchLogisticRegressionAccuracy(x, y, lr, x2, y2):
@@ -77,6 +78,7 @@ def batchLogisticRegressionAccuracy(x, y, lr, x2, y2):
     while(1):
         d = np.zeros(numFeatures) 
         for i, yi in enumerate(y):
+            wxi = np.dot(w, x[i,:])
             denom = 1 + np.exp(wxi * -1)
             yihat = 1/denom
             error = yi - yihat
