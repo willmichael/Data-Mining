@@ -14,8 +14,7 @@ def main():
     (testData_x, testData_y, trainData_x, trainData_y) = importing_data()
     # part_one(testData_x, testData_y, trainData_x, trainData_y)
     # part_two(testData_x, testData_y, trainData_x, trainData_y)
-    part_three(testData_x, testData_y, trainData_x, trainData_y)
-
+    # part_three(testData_x, testData_y, trainData_x, trainData_y)
 
 
 def part_one(testData_x, testData_y, trainData_x, trainData_y):
@@ -47,8 +46,8 @@ def part_two(testData_x, testData_y, trainData_x, trainData_y):
     #             "iterations")
 
 def part_three(testData_x, testData_y, trainData_x, trainData_y):
-    print "part three"
-    lamb_range = [0.0001, 0.001, 0.01, 0.1, 0.25, 0.5, 1, 2, 10]
+    print "part three and four"
+    lamb_range = [0.0001, 0.001, 0.01, 0.1, 0.25, 0.5, 1,2,3,5,9, 10, 100, 1000]
     learningRate = 0.0000001
     test_accuracies = []
     train_accuracies = []
@@ -64,15 +63,16 @@ def part_three(testData_x, testData_y, trainData_x, trainData_y):
         test_accuracies.append(percentageCorrect)
 
         # # train data
-        # correct = 0
-        # for i in range(trainData_x.shape[0]):
-        #     correct = correct + testLogisticRegression(trainData_x[i,:], testData_y[i], w)
-        #
-        # percentageCorrect = correct/trainData_x.shape[0]
-        # train_accuracies.append(percentageCorrect)
+        correct = 0
+        for i in range(trainData_x.shape[0]):
+            correct = correct + testLogisticRegression(trainData_x[i,:], trainData_y[i], w)
 
+        percentageCorrect = correct/trainData_x.shape[0]
+        train_accuracies.append(percentageCorrect)
 
-    graph_sse_x(test_accuracies, test_accuracies, lamb_range, "Test Accuracy", "Lambda")
+    print lamb_range
+    print test_accuracies
+    graph_sse_x(train_accuracies, test_accuracies, lamb_range, "Test Accuracy", "Lambda")
 
 
 
@@ -177,15 +177,13 @@ def testLogisticRegression(x, y, w):
     prob_one = 1/denom_one
 
     prob_zero = exp_wx/denom_one
-
     if((prob_one/prob_zero) > 1):
         if(y == 1):
             return 1
     else:
         if(y == 0):
             return 1
-    return -1
-
+    return 0
 
 # def graph_sse_x(y, y1, x, ylabel, xlabel, ylegend, y1legend):
 def graph_sse_x(y, y1, x, ylabel, xlabel):
