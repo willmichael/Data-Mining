@@ -12,8 +12,9 @@ LEARNINGRATE = 0.0000001
 
 def main():
     (testData_x, testData_y, trainData_x, trainData_y) = importing_data()
-    part_one(testData_x, testData_y, trainData_x, trainData_y)
+    # part_one(testData_x, testData_y, trainData_x, trainData_y)
     # part_two(testData_x, testData_y, trainData_x, trainData_y)
+    part_three(testData_x, testData_y, trainData_x, trainData_y)
 
 
 
@@ -43,17 +44,68 @@ def part_two(testData_x, testData_y, trainData_x, trainData_y):
 
     # Graph the percentages
     # graph_sse_x(accuracy[0], accuracy[1], np.arange(ITERATIONS), "percentage",
-                # "iterations")
+    #             "iterations")
+
+def part_three(testData_x, testData_y, trainData_x, trainData_y):
+    print "part three"
+    lamb_range = [0.0001, 0.001, 0.01, 0.1, 0.25, 0.5, 1, 2, 10]
+    learningRate = 0.0000001
+    test_accuracies = []
+    train_accuracies = []
+    for lamb in lamb_range:
+        w = batchLogisticRegressionWithRegularization(trainData_x, trainData_y, learningRate, lamb)
+        #print number of correctly predicted values
+        # test data
+        correct = 0
+        for i in range(testData_x.shape[0]):
+            correct = correct + testLogisticRegression(testData_x[i,:], testData_y[i], w)
+
+        percentageCorrect = correct/testData_x.shape[0]
+        test_accuracies.append(percentageCorrect)
+
+        # # train data
+        # correct = 0
+        # for i in range(trainData_x.shape[0]):
+        #     correct = correct + testLogisticRegression(trainData_x[i,:], testData_y[i], w)
+        #
+        # percentageCorrect = correct/trainData_x.shape[0]
+        # train_accuracies.append(percentageCorrect)
 
 
-# create w 
+    graph_sse_x(test_accuracies, test_accuracies, lamb_range, "Test Accuracy", "Lambda")
+
+
+
+def batchLogisticRegressionWithRegularization(x,y,lr,lamb):
+    numFeatures = x.shape[1]
+    w = np.zeros(numFeatures)
+    j = 0
+    while(1):
+        d = np.zeros(numFeatures)
+        for i, yi in enumerate(y):
+            wxi = np.dot(w, x[i,:])
+            nwxi = wxi * -1
+            denom = 1 + np.exp(nwxi)
+            regularization = np.multiply(lamb, w)
+            yihat = 1/denom + regularization
+            error = yi - yihat
+            d = d + np.multiply(error, x[i,:])
+        w = w + np.multiply(lr, d)
+        j = j + 1
+        # Break after j iterations
+        if(j >= ITERATIONS):
+            break;
+    print w
+    return w
+
+# create w
 # TODO: Fix Overflow
 def batchLogisticRegression(x, y, lr):
     numFeatures = x.shape[1]
     w = np.zeros(numFeatures)
     j = 0
     while(1):
-        d = np.zeros(numFeatures) 
+        d = np.zeros(numFeatures)
         for i, yi in enumerate(y):
             wxi = np.dot(w, x[i,:])
             nwxi = wxi * -1
@@ -66,17 +118,17 @@ def batchLogisticRegression(x, y, lr):
         # Break after j iterations
         if(j >= ITERATIONS):
             break;
-    print w
+    # print w
     return w
 
 def batchLogisticRegressionAccuracy(x, y, lr, x2, y2):
     numFeatures = x.shape[1]
-    resultsTrain = [] 
-    resultsTest = [] 
+    resultsTrain = []
+    resultsTest = []
     w = np.zeros(numFeatures)
     j = 0
     while(1):
-        d = np.zeros(numFeatures) 
+        d = np.zeros(numFeatures)
         for i, yi in enumerate(y):
             wxi = np.dot(w, x[i,:])
             denom = 1 + np.exp(wxi * -1)
