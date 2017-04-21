@@ -14,7 +14,7 @@ def main():
     (testData_x, testData_y, trainData_x, trainData_y) = importing_data()
     # part_one(testData_x, testData_y, trainData_x, trainData_y)
     # part_two(testData_x, testData_y, trainData_x, trainData_y)
-    # part_three(testData_x, testData_y, trainData_x, trainData_y)
+    part_three(testData_x, testData_y, trainData_x, trainData_y)
 
 
 def part_one(testData_x, testData_y, trainData_x, trainData_y):
@@ -42,8 +42,8 @@ def part_two(testData_x, testData_y, trainData_x, trainData_y):
 
 
     # Graph the percentages
-    # graph_sse_x(accuracy[0], accuracy[1], np.arange(ITERATIONS), "percentage",
-    #             "iterations")
+    graph_sse_x(accuracy[0], accuracy[1], np.arange(ITERATIONS), "percentage",
+                 "iterations", "train", "test")
 
 def part_three(testData_x, testData_y, trainData_x, trainData_y):
     print "part three and four"
@@ -72,7 +72,7 @@ def part_three(testData_x, testData_y, trainData_x, trainData_y):
 
     print lamb_range
     print test_accuracies
-    graph_sse_x(train_accuracies, test_accuracies, lamb_range, "Test Accuracy", "Lambda")
+    graph_sse_x(train_accuracies, test_accuracies, lamb_range, "Test Accuracy", "Lambda", "train", "test")
 
 
 
@@ -81,21 +81,21 @@ def batchLogisticRegressionWithRegularization(x,y,lr,lamb):
     w = np.zeros(numFeatures)
     j = 0
     while(1):
+        regularization = np.multiply(lamb, w)
         d = np.zeros(numFeatures)
         for i, yi in enumerate(y):
             wxi = np.dot(w, x[i,:])
             nwxi = wxi * -1
             denom = 1 + np.exp(nwxi)
-            regularization = np.multiply(lamb, w)
-            yihat = 1/denom + regularization
+            yihat = 1/denom
             error = yi - yihat
             d = d + np.multiply(error, x[i,:])
-        w = w + np.multiply(lr, d)
+        w = w + np.multiply(lr, d) + regularization
         j = j + 1
         # Break after j iterations
         if(j >= ITERATIONS):
             break;
-    print w
+    # print w
     return w
 
 # create w
@@ -186,13 +186,12 @@ def testLogisticRegression(x, y, w):
     return 0
 
 # def graph_sse_x(y, y1, x, ylabel, xlabel, ylegend, y1legend):
-def graph_sse_x(y, y1, x, ylabel, xlabel):
-    line1 = plt.plot(x, y)
-    line2 = plt.plot(x, y1)
+def graph_sse_x(y, y1, x, ylabel, xlabel, ylegend, y1legend):
+    line1 = plt.plot(x, y, label = ylegend)
+    line2 = plt.plot(x, y1, label = y1legend)
     plt.xlabel(xlabel)
     plt.ylabel(ylabel)
-
-    # plt.legend([ylegend,y1legend])
+    plt.legend()
 
     plt.show()
 
