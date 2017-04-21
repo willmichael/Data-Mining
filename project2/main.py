@@ -12,8 +12,8 @@ LEARNINGRATE = 0.0000001
 
 def main():
     (testData_x, testData_y, trainData_x, trainData_y) = importing_data()
-    # part_one(testData_x, testData_y, trainData_x, trainData_y)
-    # part_two(testData_x, testData_y, trainData_x, trainData_y)
+    part_one(testData_x, testData_y, trainData_x, trainData_y)
+    part_two(testData_x, testData_y, trainData_x, trainData_y)
     part_three(testData_x, testData_y, trainData_x, trainData_y)
 
 
@@ -42,8 +42,8 @@ def part_two(testData_x, testData_y, trainData_x, trainData_y):
 
 
     # Graph the percentages
-    graph_sse_x(accuracy[0], accuracy[1], np.arange(ITERATIONS), "percentage",
-                 "iterations", "train", "test")
+    graph_sse_x(accuracy[0], accuracy[1], np.arange(ITERATIONS), "Percentage Correct",
+                 "iterations (epoch)", "train", "test")
 
 def part_three(testData_x, testData_y, trainData_x, trainData_y):
     print "part three and four"
@@ -72,7 +72,7 @@ def part_three(testData_x, testData_y, trainData_x, trainData_y):
 
     print lamb_range
     print test_accuracies
-    graph_sse_x(train_accuracies, test_accuracies, lamb_range, "Test Accuracy", "Lambda", "train", "test")
+    graph_sse_x(train_accuracies, test_accuracies, lamb_range, "Accuracy", "Lambda", "train", "test")
 
 
 
