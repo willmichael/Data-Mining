@@ -70,16 +70,15 @@ def importing_data():
     dfTest = pd.read_csv(testLoc, header=None)
     dfTrain = pd.read_csv(trainLoc, header=None)
 
-    dfTestArr = dfTest.values
-    dfTrainArr = dfTrain.values
+    dfTrain_norm = (dfTrain - dfTrain.min()) / (dfTrain.max() - dfTrain.min())
+    dfTest_norm = (dfTest - dfTest.min()) / (dfTest.max() - dfTest.min())
 
-    (_, testSize_col) = dfTestArr.shape
-    (_, trainSize_col) = dfTrainArr.shape
-
-    dfTest = dfTestArr[:,:]
-    dfTrain = dfTrainArr[:,:]
+    dfTest = dfTrain_norm.values[:,:]
+    dfTrain = dfTrain_norm.values[:,:]
 
     return (dfTest, dfTrain)
 
+    
+
 if __name__ == '__main__':
-    main()
+    main( )
