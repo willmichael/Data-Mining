@@ -12,9 +12,11 @@ def main():
     (test_data, train_data) = importing_data()
     (range_k, train_acc, test_acc) = part_one(test_data, train_data)
 
-    # plt.plot(range_k, train_acc)
-    # plt.plot(range_k, test_acc)
-    # plt.show()
+    plt.plot(range_k, train_acc, label = "train")
+    plt.plot(range_k, test_acc, label = "test")
+    plt.ylabel("percent error")
+    plt.legend()
+    plt.show()
 
 
 
@@ -23,15 +25,15 @@ def part_one(test_data, train_data):
     Model selection for KNN
     """
 
-    range_k = range(1, 5, 2)
+    range_k = range(1,11, 2)
     train_acc = []
     test_acc = []
     train_neighbors_dists = knn_algo(train_data, train_data)
     test_neighbors_dists = knn_algo(test_data, train_data)
 
     for k in range_k:
-        # print "K: "
-        # print k
+        print "K: "
+        print k
         train_neighbors = find_k(train_neighbors_dists, k)
         train_err = (calculate_error(train_neighbors))
 
@@ -76,7 +78,7 @@ def calculate_error(test_neighbors):
     # print total
     print "correct number: "
     print correct
-    return 1-(correct/total)
+    return (1-(correct/total)) * 100
 
 def vote_decision(neighbors):
     num_ones = neighbors.count(1)
@@ -152,7 +154,7 @@ def euclideanDistance(instance1, instance2):
     length = len(instance1)
     # find distance between two instances
     distance = 0
-    for x in range(length):
+    for x in range(1,length):
         distance += pow((instance1[x] - instance2[x]), 2)
     # print "distance: "
     # print distance
