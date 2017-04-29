@@ -32,8 +32,6 @@ def part_one(test_data, train_data):
     test_neighbors_dists = knn_algo(test_data, train_data)
 
     for k in range_k:
-        print "K: "
-        print k
         train_neighbors = find_k(train_neighbors_dists, k)
         train_err = (calculate_error(train_neighbors))
 
@@ -44,11 +42,12 @@ def part_one(test_data, train_data):
         train_acc.append(train_err)
         test_acc.append(test_err)
 
+    print "K range: "
+    print range_k
     print "Train acc: "
     print train_acc
     print "Test acc: "
     print test_acc
-    print range_k
 
     return (range_k, train_acc, test_acc)
 
@@ -76,8 +75,6 @@ def calculate_error(test_neighbors):
             # print "fail"
     # print correct
     # print total
-    print "correct number: "
-    print correct
     return (1-(correct/total)) * 100
 
 def vote_decision(neighbors):
