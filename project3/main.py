@@ -10,8 +10,8 @@ import math
 
 def main():
     (test_data, train_data) = importing_data()
-    (range_k, train_acc, test_acc, cv_acc) = part_one(test_data, train_data)
-
+    # (range_k, train_acc, test_acc, cv_acc) = part_one(test_data, train_data)
+    results = part_two(test_data, train_data)
 
 
 
@@ -69,10 +69,11 @@ def part_one(test_data, train_data):
         the graph, a acceptable K value would be around the 35 K values."
     return (range_k, train_acc, test_acc, cv_acc)
 
-def part_two():
+def part_two(test_data, train_data):
     """
     Decision tree
     """
+    decision_tree_with_depth(train_data)
     pass
 
 def part_three():
@@ -81,6 +82,58 @@ def part_three():
     """
     pass
 
+class Tree(object):
+    def __init__(self):
+        self.data=None
+        self.left=None
+        self.right=None
+
+    def printTree(self, t):
+        if t==None:
+            return
+
+        self.printTree(t.left)
+        print len(t.data)
+        self.printTree(t.right)
+
+def decision_tree_with_depth(data):
+    root = Tree()
+    root.data = data
+
+    for i in range(1,30):
+        split(root, i)
+        root.printTree(root)
+        print 
+
+def split(root, attribute_index):
+    if root is None:
+        return root
+    # if all the same class aka leaf, return it
+    classifier = check_if_same_class(root.data)
+    if classifier:
+        return classifier
+    # else split it
+    else:
+        # init child
+        root.left = Tree()
+        root.left.data = []
+        root.right = Tree()
+        root.right.data = []
+        # split data into left and right
+        for d in root.data:
+            if d[attribute_index] < .5:
+                root.left.data.append(d)
+            else:
+                root.right.data.append(d)
+
+def check_if_same_class(data):
+    unique = data[0][0]
+    for d in data:
+        if d[0] == unique:
+            continue
+        else:
+            return False
+    return unique
 
 ### needs tuple (1/0, [array of prediction values])
 def calculate_error(test_neighbors):
