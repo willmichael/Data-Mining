@@ -11,7 +11,7 @@ import math
 def main():
     (test_data, train_data) = importing_data()
     # (range_k, train_acc, test_acc, cv_acc) = part_one(test_data, train_data)
-    results = part_two(test_data, train_data)
+    part_two(test_data, train_data)
 
 
 
@@ -73,8 +73,9 @@ def part_two(test_data, train_data):
     """
     Decision tree
     """
+    create_stump(train_data)
     decision_tree_with_depth(train_data)
-    pass
+
 
 def part_three():
     """
@@ -103,7 +104,7 @@ def decision_tree_with_depth(data):
     for i in range(1,30):
         split(root, i)
         root.printTree(root)
-        print 
+        print
 
 def split(root, attribute_index):
     if root is None:
@@ -134,6 +135,40 @@ def check_if_same_class(data):
         else:
             return False
     return unique
+
+def create_stump(data):
+    results = data[:, 0]
+    for i in range(1, len(data[0])):
+        print "Feature number: " + str(i)
+        data_col = data[:, i]
+        root_sub = count_root(results)
+        (zero_sub, one_sub) = count_zero_one(data_col, results)
+        print(calc_entropy(root_sub, zero_sub, one_sub))
+
+def maj_label(count):
+    if count[0] > count[1]:
+        return 0
+    else:
+        return 1
+
+def count_zero_one(data_col, results):
+    data_res = zip([calc_data_half(1, x) for x in data_col], results)
+    data_res.sort(key=lambda x: x[0])
+
+    total_left_zero = [x[1] for x in data_res if x[0] == 0].count(0)
+    total_left_one = [x[1] for x in data_res if x[0] == 0].count(1)
+    total_right_zero = [x[1] for x in data_res if x[0] == 1].count(0)
+    total_right_one = [x[1] for x in data_res if x[0] == 1].count(1)
+    return ((total_left_zero, total_left_one),(total_right_zero, total_right_one))
+
+def count_root(results):
+    results = results.tolist()
+    total_zero = results.count(0)
+    total_one = results.count(1)
+    return(total_zero, total_one)
+
+
+
 
 ### needs tuple (1/0, [array of prediction values])
 def calculate_error(test_neighbors):
@@ -233,6 +268,40 @@ def importing_data():
     dfTrain = dfTrain_norm.values[:,:]
 
     return (dfTest, dfTrain)
+
+
+def calc_data_half(max_val, data):
+    half = max_val/2
+    if data > half:
+        return 1
+    else:
+        return 0
+
+### accepts three tuples, root, left leaf, and right leaf
+def calc_entropy(root_sub, one_sub, two_sub):
+    root_uncertainty = node_uncertainty(root_sub)
+
+    root_l = root_sub[0]/(root_sub[0] + root_sub[1])
+    root_r = root_sub[1]/(root_sub[0] + root_sub[1])
+
+    entropy = root_uncertainty - (root_l * node_uncertainty(one_sub)) - (root_r * node_uncertainty(two_sub))
+    ### rounding errors
+    if entropy < 0:
+        return 0
+    return entropy
+
+def node_uncertainty(node):
+    node_total = node[0] + node[1]
+    node_l = node[0]/node_total
+    node_r = node[1]/node_total
+    if node_l == 0 or node_r == 0:
+        return 0
+    node_uncertainty = (-1 * node_l) * np.log2(node_l) + (-1 * node_r) * np.log2(node_r)
+    return node_uncertainty
+
+
+
+
 
 if __name__ == '__main__':
     main( )
