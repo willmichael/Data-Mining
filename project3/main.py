@@ -10,7 +10,8 @@ import math
 
 def main():
     (test_data, train_data) = importing_data()
-    (range_k, train_acc, test_acc, cv_acc) = part_one(test_data, train_data)
+    # (range_k, train_acc, test_acc, cv_acc) = part_one(test_data, train_data)
+
 
 
 
@@ -180,6 +181,35 @@ def importing_data():
     dfTrain = dfTrain_norm.values[:,:]
 
     return (dfTest, dfTrain)
+
+
+def split_data_half(max_val, data):
+    half = max_val/2
+    if data > half:
+        return 1
+    else:
+        return 0
+
+### accepts three tuples, root, left leaf, and right leaf
+def calc_entropy(root_sub, one_sub, two_sub):
+    root_uncertainty = node_uncertainty(root_sub)
+
+    root_l = root_sub[0]/(root_sub[0] + root_sub[1])
+    root_r = root_sub[1]/(root_sub[0] + root_sub[1])
+
+    entropy = root_uncertainty - (root_l * node_uncertainty(one_sub)) - (root_r * node_uncertainty(two_sub)) 
+    return entropy
+
+def node_uncertainty(node):
+    node_total = node_sub[0] + node_sub[1]
+    node_l = node_sub[0]/node_total
+    node_r = node_sub[1]/node_total
+    node_uncertainty = (-1 * node_l) * np.log2(node_l) + (-1 * node_r) * np.log2(node_r)
+    return node_uncertainty
+
+
+
+    
 
 if __name__ == '__main__':
     main( )
