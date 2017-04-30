@@ -7,17 +7,43 @@ import math
 # TODO: input,work, output
 # TODO: ^ make a more descriptive todo
 
+class dec_stump(object):
+    def __init__(self, feature, root, left, right, entropy):
+        self.feature = feature
+        self.root = root
+        self.leftInfo = left
+        self.rightInfo = right
+        self.left = 0 if left[0] > left[1] else 1
+        self.right = 0 if right[0] > right[1] else 1
+        self.entropy = entropy
+
+    def predict(self, val):
+        if val == 0:
+            return self.left
+        elif val == 1:
+            return self.right
+        else:
+            print "error"
+            return -1
+
+    def print_stump(self):
+        print "For feature: " + str(self.feature)
+        print "Left Branch: " + str(self.left)
+        print "Right Branch: " + str(self.right)
+        print "Entropy: " + str(self.entropy)
+
+    def print_stump_detailed(self):
+        print "For feature: " + str(self.feature)
+        print "Left Branch: " + str(self.leftInfo)
+        print "Right Branch: " + str(self.rightInfo)
+        print "Entropy: " + str(self.entropy)
+
 
 def main():
     (test_data, train_data) = importing_data()
     # (range_k, train_acc, test_acc, cv_acc) = part_one(test_data, train_data)
 
     part_two(test_data, train_data)
-
-
-
-
-
 
 def part_one(test_data, train_data):
     """
@@ -76,8 +102,46 @@ def part_two(test_data, train_data):
     """
     Decision tree
     """
-    create_stump(train_data)
+    # Create all stumps
+    stump_list = create_stump(train_data)
 
+    # Sort on entropy 
+    stump_list.sort(key=lambda x: x.entropy)
+    
+    # for sl in stump_list:
+        # sl.print_stump_detailed()
+        # print
+
+    train_perc = []
+    test_perc = []
+
+    train_res = train_data[:, 0]
+    test_res = test_data[:, 0]
+    for i in range(1,10):
+        train_col = train_data[:, i]
+        test_col = test_data[:, i]
+
+        print "Feature: " + str(stump_list[i-1].feature)
+
+        countGood = 0
+        for idx, trc in enumerate(train_col):
+            half_train = calc_data_half(1, trc)
+            if train_res[idx] == (stump_list[i-1].predict(half_train)):
+                countGood += 1
+
+        train_p = str(countGood/len(train_res)*100)
+        train_perc.append(train_p)
+        print "Train Correct Percentage: " + str(train_p)
+
+        countGood = 0
+        for idx, trc in enumerate(test_col):
+            half_test = calc_data_half(1, trc)
+            if test_res[idx] == (stump_list[i-1].predict(half_test)):
+                countGood += 1
+
+        test_p = str(countGood/len(test_res)*100)
+        test_perc.append(test_p)
+        print "Test Correct Percentage: " + str(test_p)
 
 def part_three():
     """
@@ -88,12 +152,18 @@ def part_three():
 
 def create_stump(data):
     results = data[:, 0]
+    feature_list = range(1, len(data[0]), 1)
+    entropy_list = []
+    stump_list = []
     for i in range(1, len(data[0])):
-        print "Feature number: " + str(i)
         data_col = data[:, i]
         root_sub = count_root(results)
         (zero_sub, one_sub) = count_zero_one(data_col, results)
-        print(calc_entropy(root_sub, zero_sub, one_sub))
+
+        entropy = calc_entropy(root_sub, zero_sub, one_sub)
+        stump = dec_stump(i, root_sub, zero_sub, one_sub, entropy)
+        stump_list.append(stump)
+    return stump_list
 
 def maj_label(count):
     if count[0] > count[1]:
@@ -116,9 +186,6 @@ def count_root(results):
     total_zero = results.count(0)
     total_one = results.count(1)
     return(total_zero, total_one)
-
-
-
 
 ### needs tuple (1/0, [array of prediction values])
 def calculate_error(test_neighbors):
