@@ -92,7 +92,6 @@ class Tree(object):
     def printTree(self, t):
         if t==None:
             return
-
         self.printTree(t.left)
         print len(t.data)
         self.printTree(t.right)
@@ -100,32 +99,81 @@ class Tree(object):
 def decision_tree_with_depth(data):
     root = Tree()
     root.data = data
+    head = root
 
-    for i in range(1,30):
-        split(root, i)
-        root.printTree(root)
-        print
+    do_split(head, 6, 0)
+    head.printTree(head)
+    # todo: recurse
 
-def split(root, attribute_index):
+def test_split(attribute_index, head):
+    head.left = Tree()
+    head.left.data = []
+    head.right = Tree()
+    head.right.data = []
+    for d in head.data:
+        if d[attribute_index] < .5:
+            head.left.data.append(d)
+        else:
+            head.right.data.append(d)
+    return head
+
+def find_split(root):
     if root is None:
         return root
-    # if all the same class aka leaf, return it
-    classifier = check_if_same_class(root.data)
-    if classifier:
-        return classifier
-    # else split it
+    # find feature to split on
+    features_range = range(1,30)
+    entropies = []
+    for i in features_range:
+        test_split(i, root)
+
+        root_data = data_into_nparray(root.data)
+        rt = count_root(root_data)
+
+        l_data = data_into_nparray(root.left.data)
+        left = count_root(l_data)
+
+        r_data = data_into_nparray(root.right.data)
+        right = count_root(r_data)
+
+        entropies.append(calc_entropy(rt, left, right))
+
+    return entropies.index(min(entropies))
+
+def make_leaf(head):
+    classifier = [row[0] for row in head.data]
+    return max(set(classifier), key=classifier.count)
+
+def do_split(head, max_depth, depth):
+    if head.data is None:
+        return None
+
+    if depth >= max_depth:
+        make_leaf(head.left)
+        make_leaf(head.right)
+        return
+
+    # do split
+    target_index = find_split(head)
+    test_split(target_index, head)
+    # go left
+    if head.left:
+        do_split(head.left, max_depth, depth+1)
     else:
-        # init child
-        root.left = Tree()
-        root.left.data = []
-        root.right = Tree()
-        root.right.data = []
-        # split data into left and right
-        for d in root.data:
-            if d[attribute_index] < .5:
-                root.left.data.append(d)
-            else:
-                root.right.data.append(d)
+        head.left.data = make_leaf(head.left)
+    # go right
+    if head.right:
+        do_split(head.right, max_depth, depth+1)
+    else:
+        head.right.data = make_leaf(head.right)
+
+
+
+def data_into_nparray(data):
+    temp = []
+    for nd in data:
+        temp.append(nd[0])
+    temp = np.array(temp)
+    return temp
 
 def check_if_same_class(data):
     unique = data[0][0]
@@ -139,11 +187,11 @@ def check_if_same_class(data):
 def create_stump(data):
     results = data[:, 0]
     for i in range(1, len(data[0])):
-        print "Feature number: " + str(i)
+        # print "Feature number: " + str(i)
         data_col = data[:, i]
         root_sub = count_root(results)
         (zero_sub, one_sub) = count_zero_one(data_col, results)
-        print(calc_entropy(root_sub, zero_sub, one_sub))
+        # print(calc_entropy(root_sub, zero_sub, one_sub))
 
 def maj_label(count):
     if count[0] > count[1]:
@@ -166,9 +214,6 @@ def count_root(results):
     total_zero = results.count(0)
     total_one = results.count(1)
     return(total_zero, total_one)
-
-
-
 
 ### needs tuple (1/0, [array of prediction values])
 def calculate_error(test_neighbors):
@@ -268,7 +313,6 @@ def importing_data():
     dfTrain = dfTrain_norm.values[:,:]
 
     return (dfTest, dfTrain)
-
 
 def calc_data_half(max_val, data):
     half = max_val/2
