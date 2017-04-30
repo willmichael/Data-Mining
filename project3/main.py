@@ -10,13 +10,9 @@ import math
 
 def main():
     (test_data, train_data) = importing_data()
-    (range_k, train_acc, test_acc) = part_one(test_data, train_data)
+    (range_k, train_acc, test_acc, cv_acc) = part_one(test_data, train_data)
 
-    plt.plot(range_k, train_acc, label = "train")
-    plt.plot(range_k, test_acc, label = "test")
-    plt.ylabel("percent error")
-    plt.legend()
-    plt.show()
+
 
 
 
@@ -25,11 +21,13 @@ def part_one(test_data, train_data):
     Model selection for KNN
     """
 
-    range_k = range(1,11, 2)
+    range_k = range(1,71, 2)
     train_acc = []
     test_acc = []
+    cv_acc = []
     train_neighbors_dists = knn_algo(train_data, train_data)
     test_neighbors_dists = knn_algo(test_data, train_data)
+    cv_dists = knn_algo_cross_validate(train_data)
 
     for k in range_k:
         train_neighbors = find_k(train_neighbors_dists, k)
@@ -38,18 +36,38 @@ def part_one(test_data, train_data):
         test_neighbors = find_k(test_neighbors_dists, k)
         test_err = (calculate_error(test_neighbors))
 
+        cv_neighbors = find_k(cv_dists, k)
+        cv_err = (calculate_error(cv_neighbors))
+
         ### TODO: cross validation here
         train_acc.append(train_err)
         test_acc.append(test_err)
+        cv_acc.append(cv_err)
 
+    # part 1.1
     print "K range: "
     print range_k
     print "Train acc: "
     print train_acc
     print "Test acc: "
     print test_acc
-
-    return (range_k, train_acc, test_acc)
+    print "CV acc: "
+    print cv_acc
+    # part 1.2
+    plt.plot(range_k, train_acc, label = "train")
+    plt.plot(range_k, test_acc, label = "test")
+    plt.plot(range_k, cv_acc, label = "CV")
+    plt.ylabel("percent error")
+    plt.legend()
+    plt.show()
+    # part 1.3
+    print " We observe that as K get larger that the error rate rises. Our training \
+        data is perfect when compared to itself and with a K of 1. The error rate \
+        rises pretty rapidly there after. Our test data's error rate stays approximately \
+        6 percent error for the first 70 K values. Our leave-one-out cross-validation \
+        error rate has a somewhat linear climb similar to the training set. Looking at \
+        the graph, a acceptable K value would be around the 35 K values."
+    return (range_k, train_acc, test_acc, cv_acc)
 
 def part_two():
     """
@@ -88,34 +106,24 @@ def vote_decision(neighbors):
         print "error"
         return -1
 
-def knn_algo_cross_validate(test_data, train_data, k):
+def knn_algo_cross_validate(train_data):
     # for each test item, find the distance between it and every item in the
     # training set
     test_neighbors = []
-    # j = 0
-    for test_instance in test_data:
+    for test_instance in train_data:
         distances = []
         for x in range(len(train_data)):
-            dist = euclideanDistance(test_instance, train_data[x])
-            # These distances are the all train distances for each particular test
-            # instance
-            # print dist
-            distances.append( (train_data[x], dist) )
+            if np.array_equal(test_instance, train_data[x]):
+                continue
+            else:
+                dist = euclideanDistance(test_instance, train_data[x])
+                # These distances are the all train distances for each particular test
+                # instance
+                # print dist
+                distances.append( (train_data[x], dist) )
         # Sorted to find the lowest distance
         distances.sort(key=lambda tup: tup[1])
-        # once all the distances have been found, find the K nearest neighbors
-        neighbors = []
-
-        # print test_instance[0]
-        for i in range(k):
-            # store and the lowest k neighbor's prediction value (1 or 0)
-            neighbors.append(distances[i][0][0])
-
-            # print distances[i]
-        test_neighbors.append((test_instance[0], neighbors))
-        # j += 1
-        # if j == 100:
-            # break
+        test_neighbors.append((test_instance, distances))
     return test_neighbors
 
 def knn_algo(test_data, train_data):
