@@ -56,7 +56,7 @@ class dec_stump(object):
 
 def main():
     (test_data, train_data) = importing_data()
-    # (range_k, train_acc, test_acc, cv_acc) = part_one(test_data, train_data)
+    (range_k, train_acc, test_acc, cv_acc) = part_one(test_data, train_data)
     part_two(test_data, train_data)
 
 def part_one(test_data, train_data):
@@ -101,6 +101,7 @@ def part_one(test_data, train_data):
     plt.plot(range_k, test_acc, label = "test")
     plt.plot(range_k, cv_acc, label = "CV")
     plt.ylabel("percent error")
+    plt.xlabel("k")
     plt.legend()
     plt.show()
     # part 1.3
