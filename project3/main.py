@@ -24,7 +24,7 @@ class Tree(object):
         self.printTree(t.right)
 
 class dec_stump(object):
-    def __init__(self, feature, root, left, right, entropy):
+    def __init__(self, feature, root, left, right, entropy, threshold):
         self.feature = feature
         self.root = root
         self.leftInfo = left
@@ -32,6 +32,7 @@ class dec_stump(object):
         self.left = 0 if left[0] > left[1] else 1
         self.right = 0 if right[0] > right[1] else 1
         self.entropy = entropy
+        self.threshold = threshold
 
     def predict(self, val):
         if val == 0:
@@ -46,17 +47,20 @@ class dec_stump(object):
         print "For feature: " + str(self.feature)
         print "Left Branch: " + str(self.left)
         print "Right Branch: " + str(self.right)
+        print "Thresh: " + str(self.threshold)
         print "Entropy: " + str(self.entropy)
 
     def print_stump_detailed(self):
         print "For feature: " + str(self.feature)
+        print "Root: " + str(self.root)
         print "Left Branch: " + str(self.leftInfo)
         print "Right Branch: " + str(self.rightInfo)
+        print "Threshold: " + str(self.threshold)
         print "Entropy: " + str(self.entropy)
 
 def main():
     (test_data, train_data) = importing_data()
-    (range_k, train_acc, test_acc, cv_acc) = part_one(test_data, train_data)
+    # (range_k, train_acc, test_acc, cv_acc) = part_one(test_data, train_data)
     part_two(test_data, train_data)
 
 def part_one(test_data, train_data):
@@ -133,7 +137,8 @@ def part_two(test_data, train_data):
 
     train_res = train_data[:, 0]
     test_res = test_data[:, 0]
-    for i in range(1,10):
+    for i in range(1,31):
+        stump_list[i-1].print_stump_detailed()
         train_col = train_data[:, i]
         test_col = test_data[:, i]
 
@@ -141,7 +146,7 @@ def part_two(test_data, train_data):
 
         countGood = 0
         for idx, trc in enumerate(train_col):
-            half_train = calc_data_half(1, trc)
+            half_train = calc_data_split(stump_list[i-1].threshold, trc)
             if train_res[idx] == (stump_list[i-1].predict(half_train)):
                 countGood += 1
 
@@ -151,7 +156,7 @@ def part_two(test_data, train_data):
 
         countGood = 0
         for idx, trc in enumerate(test_col):
-            half_test = calc_data_half(1, trc)
+            half_test = calc_data_split(stump_list[i-1].threshold, trc)
             if test_res[idx] == (stump_list[i-1].predict(half_test)):
                 countGood += 1
 
@@ -189,7 +194,6 @@ def decision_tree_with_depth(train_data, test_data):
     print "Train error: " + str((train_correct/len(test_data)*100))
     print "Test error: " + str((test_correct/len(test_data))*100)
 
-
 def predict(root, row):
     if root == None:
         return None
@@ -200,7 +204,6 @@ def predict(root, row):
         return predict(root.left, row)
     else:
         return predict(root.right, row)
-
 
 def test_split(attribute_index, head):
     head.left = Tree()
@@ -291,8 +294,6 @@ def do_split(head, max_depth, depth):
     else:
         do_split(head.right, max_depth, depth+1)
 
-
-
 def data_into_nparray(data):
     temp = []
     for nd in data:
@@ -316,11 +317,12 @@ def create_stump(data):
     stump_list = []
     for i in range(1, len(data[0])):
         data_col = data[:, i]
+        thresh = calc_threshold_theta(data_col, results)
         root_sub = count_root(results)
-        (zero_sub, one_sub) = count_zero_one(data_col, results)
+        (zero_sub, one_sub) = count_zero_one(data_col, results, thresh)
 
         entropy = calc_entropy(root_sub, zero_sub, one_sub)
-        stump = dec_stump(i, root_sub, zero_sub, one_sub, entropy)
+        stump = dec_stump(i, root_sub, zero_sub, one_sub, entropy, thresh)
         stump_list.append(stump)
     return stump_list
 
@@ -330,8 +332,8 @@ def maj_label(count):
     else:
         return 1
 
-def count_zero_one(data_col, results):
-    data_res = zip([calc_data_half(1, x) for x in data_col], results)
+def count_zero_one(data_col, results, threshold):
+    data_res = zip([calc_data_split(threshold, x) for x in data_col], results)
     data_res.sort(key=lambda x: x[0])
 
     total_left_zero = [x[1] for x in data_res if x[0] == 0].count(0)
@@ -445,9 +447,8 @@ def importing_data():
 
     return (dfTest, dfTrain)
 
-def calc_data_half(max_val, data):
-    half = max_val/2
-    if data > half:
+def calc_data_split(split, data):
+    if data > split:
         return 1
     else:
         return 0
@@ -458,46 +459,41 @@ def calc_threshold_theta(data_col, results):
 
     infoGain = []
     prevClass = 0
-    for idx, dr in enumerate(data_res):
+
+    for idx, dr in enumerate(data_res[1:-1]):
         # Calc entrop when class label changes
-        if prevClass != dr[idx][0]:
+        if prevClass != dr[0]:
             root_sub = count_root(results)
-            (zero_sub, one_sub) = count_zero_one(data_col, results)
+            (zero_sub, one_sub) = count_zero_one(data_col, results, dr[1])
             entrop = calc_entropy(root_sub, zero_sub, one_sub)
-            infoGain.append(entrop, dr[idx][1])
-    
+            infoGain.append((entrop, dr[1]))
+
     # Sort on entropy to find minimum entropy
-    entrop.sort(key=lambda x: x[0])
+    infoGain.sort(key=lambda x: x[0])
     # return the number we should be splitting on
-    return entrop[0][1]
+    return infoGain[0][1]
 
 ### accepts three tuples, root, left leaf, and right leaf
 def calc_entropy(root_sub, one_sub, two_sub):
     root_uncertainty = node_uncertainty(root_sub)
 
-    root_l = root_sub[0]/(root_sub[0] + root_sub[1])
-    root_r = root_sub[1]/(root_sub[0] + root_sub[1])
+    root_l = (one_sub[0] + one_sub[1])/(root_sub[0] + root_sub[1])
+    root_r = (two_sub[0] + two_sub[1])/(root_sub[0] + root_sub[1])
 
     entropy = root_uncertainty - (root_l * node_uncertainty(one_sub)) - (root_r * node_uncertainty(two_sub))
-    ### rounding errors
-    if entropy < 0:
-        return 0
     return entropy
 
 def node_uncertainty(node):
     node_total = node[0] + node[1]
     if node_total == 0:
         return 0
+
     node_l = node[0]/node_total
     node_r = node[1]/node_total
     if node_l == 0 or node_r == 0:
         return 0
     node_uncertainty = (-1 * node_l) * np.log2(node_l) + (-1 * node_r) * np.log2(node_r)
     return node_uncertainty
-
-
-
-
 
 if __name__ == '__main__':
     main( )
