@@ -117,6 +117,7 @@ def part_two(test_data, train_data):
     """
     Decision tree
     """
+    # part 2.1
     # Create all stumps
     stump_list = create_stump(train_data)
 
@@ -158,15 +159,8 @@ def part_two(test_data, train_data):
         test_perc.append(test_p)
         print "Test Correct Percentage: " + str(test_p)
 
+    # part 2.2
     decision_tree_with_depth(train_data, test_data)
-
-
-def part_three():
-    """
-    extra credit
-    """
-    pass
-
 
 def decision_tree_with_depth(train_data, test_data):
     # build the tree
