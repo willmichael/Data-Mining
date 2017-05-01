@@ -294,6 +294,25 @@ def calc_data_half(max_val, data):
     else:
         return 0
 
+def calc_threshold_theta(data_col, results):
+    data_res = zip(results, data_col)
+    data_res.sort(key=lambda x: x[1])
+
+    infoGain = []
+    prevClass = 0
+    for idx, dr in enumerate(data_res):
+        # Calc entrop when class label changes
+        if prevClass != dr[idx][0]:
+            root_sub = count_root(results)
+            (zero_sub, one_sub) = count_zero_one(data_col, results)
+            entrop = calc_entropy(root_sub, zero_sub, one_sub)
+            infoGain.append(entrop, dr[idx][1])
+    
+    # Sort on entropy to find minimum entropy
+    entrop.sort(key=lambda x: x[0])
+    # return the number we should be splitting on
+    return entrop[0][1]
+
 ### accepts three tuples, root, left leaf, and right leaf
 def calc_entropy(root_sub, one_sub, two_sub):
     root_uncertainty = node_uncertainty(root_sub)
