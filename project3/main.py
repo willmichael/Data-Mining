@@ -7,6 +7,22 @@ import math
 # TODO: input,work, output
 # TODO: ^ make a more descriptive todo
 
+class Tree(object):
+    def __init__(self):
+        self.data=None
+        self.left=None
+        self.right=None
+        self.index=None
+
+    def printTree(self, t):
+        if t==None:
+            return
+
+        if t.left == None and t.right == None:
+            print t.data
+        self.printTree(t.left)
+        self.printTree(t.right)
+
 class dec_stump(object):
     def __init__(self, feature, root, left, right, entropy):
         self.feature = feature
@@ -38,11 +54,9 @@ class dec_stump(object):
         print "Right Branch: " + str(self.rightInfo)
         print "Entropy: " + str(self.entropy)
 
-
 def main():
     (test_data, train_data) = importing_data()
-    # (range_k, train_acc, test_acc, cv_acc) = part_one(test_data, train_data)
-
+    (range_k, train_acc, test_acc, cv_acc) = part_one(test_data, train_data)
     part_two(test_data, train_data)
 
 def part_one(test_data, train_data):
@@ -87,6 +101,7 @@ def part_one(test_data, train_data):
     plt.plot(range_k, test_acc, label = "test")
     plt.plot(range_k, cv_acc, label = "CV")
     plt.ylabel("percent error")
+    plt.xlabel("k")
     plt.legend()
     plt.show()
     # part 1.3
@@ -105,9 +120,9 @@ def part_two(test_data, train_data):
     # Create all stumps
     stump_list = create_stump(train_data)
 
-    # Sort on entropy 
+    # Sort on entropy
     stump_list.sort(key=lambda x: x.entropy)
-    
+
     # for sl in stump_list:
         # sl.print_stump_detailed()
         # print
@@ -143,12 +158,162 @@ def part_two(test_data, train_data):
         test_perc.append(test_p)
         print "Test Correct Percentage: " + str(test_p)
 
+    decision_tree_with_depth(train_data, test_data)
+
+
 def part_three():
     """
     extra credit
     """
     pass
 
+
+def decision_tree_with_depth(train_data, test_data):
+    # build the tree
+    root = Tree()
+    root.data = train_data
+    head = root
+    do_split(head, 6, 1)
+
+    # With test data, test it againest the tree
+    test_correct = 0
+    for row in test_data:
+        prediction = predict(head, row)
+        # print "predicted: " + str(prediction) + " Expected: " + str(row[0])
+        if prediction == row[0]:
+            test_correct += 1
+
+    # test train data againest tree
+    train_correct = 0
+    for row in train_data:
+        prediction = predict(head, row)
+        # print "predicted: " + str(prediction) + " Expected: " + str(row[0])
+        if prediction == row[0]:
+            train_correct += 1
+
+    print "\nDecision tree with depth 6: "
+    print "Train error: " + str((train_correct/len(test_data)*100))
+    print "Test error: " + str((test_correct/len(test_data))*100)
+
+
+def predict(root, row):
+    if root == None:
+        return None
+    if len(root.data) == 1:
+        return root.data[0]
+
+    if row[root.index] < .5:
+        return predict(root.left, row)
+    else:
+        return predict(root.right, row)
+
+
+def test_split(attribute_index, head):
+    head.left = Tree()
+    head.left.data = []
+    head.left.index = attribute_index
+    head.right = Tree()
+    head.right.data = []
+    head.right.index = attribute_index
+    for d in head.data:
+        if d[attribute_index] < .5:
+            head.left.data.append(d)
+        else:
+            head.right.data.append(d)
+    return head
+
+def find_split(root):
+    if root is None:
+        return root
+    # find feature to split on
+    features_range = range(1,30)
+    entropies = []
+    for i in features_range:
+        test_split(i, root)
+
+        root_data = data_into_nparray(root.data)
+        rt = count_root(root_data)
+
+        l_data = data_into_nparray(root.left.data)
+        left = count_root(l_data)
+
+        r_data = data_into_nparray(root.right.data)
+        right = count_root(r_data)
+
+        entropies.append(calc_entropy(rt, left, right))
+
+    target_attribute = entropies.index(min(entropies)) +1
+    return (min(entropies), target_attribute)
+
+def make_leaf(head):
+    if head is None or len(head.data) == 0:
+        return None
+    head.left = None
+    head.right = None
+    classifier = [row[0] for row in head.data]
+    head.data = [max(set(classifier), key=classifier.count)]
+    return head.data
+
+def do_split(head, max_depth, depth):
+    if head.data is None:
+        return None
+
+    # print "len of head data: " + str(len(head.data))
+    # print [row[0] for row in head.data]
+
+    if check_if_same_class(head.data):
+        return make_leaf(head)
+
+    if depth >= max_depth:
+        make_leaf(head)
+        return
+
+    # do split
+    target_index = find_split(head)
+    head.index = target_index[1]
+    test_split(target_index[1], head)
+
+    # To print tree
+    # print "\nDepth: " + str(depth)
+    # print "Splitting by index #" + str(target_index[1])
+    # print "Info gain: " + str(target_index[0])
+
+    if head.left is None and head.right is None:
+        return
+
+    # go left
+    if len(head.left.data) == 0:
+        head.left = None
+    elif len(head.left.data) <= 1:
+        make_leaf(head.left)
+    else:
+        do_split(head.left, max_depth, depth+1)
+
+    # go right
+    if len(head.right.data) == 0:
+        head.right = None
+    elif len(head.right.data) <= 1:
+        make_leaf(head.right)
+    else:
+        do_split(head.right, max_depth, depth+1)
+
+
+
+def data_into_nparray(data):
+    temp = []
+    for nd in data:
+        temp.append(nd[0])
+    temp = np.array(temp)
+    return temp
+
+def check_if_same_class(data):
+    unique = data[0][0]
+    for d in data:
+        if d[0] == unique:
+            continue
+        else:
+            return False
+    return unique
 
 def create_stump(data):
     results = data[:, 0]
@@ -286,7 +451,6 @@ def importing_data():
 
     return (dfTest, dfTrain)
 
-
 def calc_data_half(max_val, data):
     half = max_val/2
     if data > half:
@@ -320,14 +484,16 @@ def calc_entropy(root_sub, one_sub, two_sub):
     root_l = root_sub[0]/(root_sub[0] + root_sub[1])
     root_r = root_sub[1]/(root_sub[0] + root_sub[1])
 
-    entropy = root_uncertainty - (root_l * node_uncertainty(one_sub)) - (root_r * node_uncertainty(two_sub)) 
+    entropy = root_uncertainty - (root_l * node_uncertainty(one_sub)) - (root_r * node_uncertainty(two_sub))
     ### rounding errors
-    if entropy < 0: 
+    if entropy < 0:
         return 0
     return entropy
 
 def node_uncertainty(node):
     node_total = node[0] + node[1]
+    if node_total == 0:
+        return 0
     node_l = node[0]/node_total
     node_r = node[1]/node_total
     if node_l == 0 or node_r == 0:
@@ -337,7 +503,7 @@ def node_uncertainty(node):
 
 
 
-    
+
 
 if __name__ == '__main__':
     main( )
