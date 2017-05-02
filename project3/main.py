@@ -13,6 +13,8 @@ class Tree(object):
         self.left=None
         self.right=None
         self.index=None
+        self.attributeValue=None
+        self.infoGain=None
 
     def printTree(self, t):
         if t==None:
@@ -165,6 +167,7 @@ def part_two(test_data, train_data):
         print "Test Correct Percentage: " + str(test_p)
 
     # part 2.2
+    print "\nPart 2.2: "
     decision_tree_with_depth(train_data, test_data)
 
 def decision_tree_with_depth(train_data, test_data):
@@ -172,13 +175,20 @@ def decision_tree_with_depth(train_data, test_data):
     root = Tree()
     root.data = train_data
     head = root
-    do_split(head, 6, 1)
+    max_depth = 6
+    head = Tree()
+    head.data = train_data
+    # start the split
+    do_split(head, max_depth, 1)
+
+    # print leaf nodes:
+    # head.printTree(head)
 
     # With test data, test it againest the tree
     test_correct = 0
     for row in test_data:
         prediction = predict(head, row)
-        # print "predicted: " + str(prediction) + " Expected: " + str(row[0])
+        # print "Test_data: predicted: " + str(prediction) + " Expected: " + str(row[0])
         if prediction == row[0]:
             test_correct += 1
 
@@ -186,62 +196,92 @@ def decision_tree_with_depth(train_data, test_data):
     train_correct = 0
     for row in train_data:
         prediction = predict(head, row)
-        # print "predicted: " + str(prediction) + " Expected: " + str(row[0])
+        # print "Train_data: predicted: " + str(prediction) + " Expected: " + str(row[0])
         if prediction == row[0]:
             train_correct += 1
+    # get accuracy
+    train_acc = train_correct/len(train_data)*100
+    test_acc = test_correct/len(test_data)*100
+    # print results
+    print "\nDecision tree with depth " + str(max_depth)
+    print "Train error: " + str(train_acc)
+    print "Test error: " + str(test_acc)
 
-    print "\nDecision tree with depth 6: "
-    print "Train error: " + str((train_correct/len(test_data)*100))
-    print "Test error: " + str((test_correct/len(test_data))*100)
-
+# prediction function to traverse the tree and get leaf values
 def predict(root, row):
+    # null case
     if root == None:
         return None
+    # leaf case
     if len(root.data) == 1:
         return root.data[0]
-
-    if row[root.index] < .5:
+    # travese
+    if row[root.index] < root.attributeValue:
         return predict(root.left, row)
     else:
         return predict(root.right, row)
 
-def test_split(attribute_index, head):
+# test_split splits the head data into it's left and right children
+# needs attribute index and value to split
+def test_split(attribute_index, head, attribute_value):
     head.left = Tree()
     head.left.data = []
     head.left.index = attribute_index
+    head.left.attributeValue = attribute_value
+
     head.right = Tree()
     head.right.data = []
     head.right.index = attribute_index
+    head.right.attributeValue = attribute_value
     for d in head.data:
-        if d[attribute_index] < .5:
+        if d[attribute_index] < attribute_value:
             head.left.data.append(d)
         else:
             head.right.data.append(d)
+    head.left.data = np.array(head.left.data)
+    head.right.data = np.array(head.right.data)
+
     return head
 
+# find split goes through all the attributes and finds:
+# - best threshold for minimum entropy for each attribute
+# - returns best attribute_index, it's entropy value, threshold value to split on
 def find_split(root):
     if root is None:
         return root
     # find feature to split on
-    features_range = range(1,30)
+    features_range = range(1,len(root.data[0]))
     entropies = []
+    thresholds = []
+    results = root.data[:,0]
+    # for each attribute ...
     for i in features_range:
-        test_split(i, root)
+        data_col = root.data[:,i]
+        # find threshold to split on for current attribute I
+        threshold = calc_threshold_theta(data_col, results)
+        # print "feature: " + str(i)
+        # print "threshold: " + str(threshold)
 
-        root_data = data_into_nparray(root.data)
-        rt = count_root(root_data)
+        # calculate entropy
+        root_sub = count_root(results)
+        (zero_sub, one_sub) = count_zero_one(data_col, results, threshold)
+        entropy = calc_entropy(root_sub, zero_sub, one_sub)
 
-        l_data = data_into_nparray(root.left.data)
-        left = count_root(l_data)
+        # print "entropy: " + str(entropy)
+        # store entropy and thresholds in their own lists
+        thresholds.append(threshold)
+        entropies.append(entropy)
 
-        r_data = data_into_nparray(root.right.data)
-        right = count_root(r_data)
+    # print "entropies: " +str(entropies)
+    # print "thresholds: " +str(thresholds)
 
-        entropies.append(calc_entropy(rt, left, right))
-
+    # find best attribute and thresholds based on entropy
     target_attribute = entropies.index(min(entropies)) +1
-    return (min(entropies), target_attribute)
+    best_thresh = thresholds[target_attribute-1]
+    return (min(entropies), target_attribute, best_thresh)
 
+# make leaf is a function to turn the current tree node into a single class
+# decision is based on the most voted 1 or 0 class
 def make_leaf(head):
     if head is None or len(head.data) == 0:
         return None
@@ -249,40 +289,57 @@ def make_leaf(head):
     head.right = None
     classifier = [row[0] for row in head.data]
     head.data = [max(set(classifier), key=classifier.count)]
+    # print "len leaf data: " + str(len(classifier))
+    # print "leaf data: " + str(classifier)
+    # print "leaf class: " + str(head.data)
     return head.data
 
+# split is the recursive function that splits the current node into two nodes
+# until the specified depth has reached
 def do_split(head, max_depth, depth):
+    print "\nDepth: " + str(depth)
+    # null case
     if head.data is None:
         return None
 
-    # print "len of head data: " + str(len(head.data))
-    # print [row[0] for row in head.data]
-
+    # check if all of the data is the same class, if it is make the current node
+    # a leaf
     if check_if_same_class(head.data):
+        # print "same class"
         return make_leaf(head)
 
+    # check for max depth
     if depth >= max_depth:
-        make_leaf(head)
-        return
+        # print "max depth reached " + str(depth)
+        return make_leaf(head)
 
-    # do split
+    # find the split, returns (infogain, index, threshold value)
     target_index = find_split(head)
+    head.infoGain = target_index[0]
     head.index = target_index[1]
-    test_split(target_index[1], head)
+    head.attributeValue = target_index[2]
+    # do the actual split
+    test_split(target_index[1], head, target_index[2])
 
-    # To print tree
-    # print "\nDepth: " + str(depth)
-    # print "Splitting by index #" + str(target_index[1])
-    # print "Info gain: " + str(target_index[0])
-
+    # were done if no children was made
     if head.left is None and head.right is None:
         return
 
+    # print "Splitting by index #" + str(target_index[1])
+    print "infogain, split index, split Value: " + str(target_index)
+    print "Head len : " + str(len(head.data)) + " "
+    print "head left: " + str(len(head.left.data)) + " "
+    print "head right: " + str(len(head.right.data)) + " "
+
+
     # go left
+    # if left is empty, make null
     if len(head.left.data) == 0:
         head.left = None
+    # if left data is a leaf, make it a leaf
     elif len(head.left.data) <= 1:
         make_leaf(head.left)
+    # otherwise split left
     else:
         do_split(head.left, max_depth, depth+1)
 
@@ -294,13 +351,7 @@ def do_split(head, max_depth, depth):
     else:
         do_split(head.right, max_depth, depth+1)
 
-def data_into_nparray(data):
-    temp = []
-    for nd in data:
-        temp.append(nd[0])
-    temp = np.array(temp)
-    return temp
-
+# check if all of data's class is the same, if not return false
 def check_if_same_class(data):
     unique = data[0][0]
     for d in data:
@@ -308,7 +359,7 @@ def check_if_same_class(data):
             continue
         else:
             return False
-    return unique
+    return True
 
 def create_stump(data):
     results = data[:, 0]
@@ -457,12 +508,17 @@ def calc_threshold_theta(data_col, results):
     data_res = zip(results, data_col)
     data_res.sort(key=lambda x: x[1])
 
+    # print "data_res: " + str(data_res)
+    if len(data_res) <= 2:
+        return data_res[0][1]
+
     infoGain = []
-    prevClass = 0
+    prevClass = -999
 
     for idx, dr in enumerate(data_res[1:-1]):
         # Calc entrop when class label changes
         if prevClass != dr[0]:
+            prevClass = dr[0]
             root_sub = count_root(results)
             (zero_sub, one_sub) = count_zero_one(data_col, results, dr[1])
             entrop = calc_entropy(root_sub, zero_sub, one_sub)
@@ -485,8 +541,6 @@ def calc_entropy(root_sub, one_sub, two_sub):
 
 def node_uncertainty(node):
     node_total = node[0] + node[1]
-    if node_total == 0:
-        return 0
 
     node_l = node[0]/node_total
     node_r = node[1]/node_total
