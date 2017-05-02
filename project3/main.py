@@ -142,6 +142,7 @@ def part_two(test_data, train_data):
     test_col = test_data[:, i]
 
     print "Feature: " + str(stump_list[i-1].feature)
+    stump_list[i-1].print_stump()
 
     countGood = 0
     for idx, trc in enumerate(train_col):
