@@ -62,14 +62,14 @@ class dec_stump(object):
 
 def main():
     (test_data, train_data) = importing_data()
-    # (range_k, train_acc, test_acc, cv_acc) = part_one(test_data, train_data)
+    (range_k, train_acc, test_acc, cv_acc) = part_one(test_data, train_data)
     part_two(test_data, train_data)
 
 def part_one(test_data, train_data):
     """
     Model selection for KNN
     """
-
+    print "Part 1.1"
     range_k = range(1,71, 2)
     train_acc = []
     test_acc = []
@@ -102,6 +102,8 @@ def part_one(test_data, train_data):
     print test_acc
     print "CV acc: "
     print cv_acc
+
+    print "Part 1.2: "
     # part 1.2
     plt.plot(range_k, train_acc, label = "train")
     plt.plot(range_k, test_acc, label = "test")
@@ -110,13 +112,6 @@ def part_one(test_data, train_data):
     plt.xlabel("k")
     plt.legend()
     plt.show()
-    # part 1.3
-    print " We observe that as K get larger that the error rate rises. Our training \
-        data is perfect when compared to itself and with a K of 1. The error rate \
-        rises pretty rapidly there after. Our test data's error rate stays approximately \
-        6 percent error for the first 70 K values. Our leave-one-out cross-validation \
-        error rate has a somewhat linear climb similar to the training set. Looking at \
-        the graph, a acceptable K value would be around the 35 K values."
     return (range_k, train_acc, test_acc, cv_acc)
 
 def part_two(test_data, train_data):
@@ -124,6 +119,7 @@ def part_two(test_data, train_data):
     Decision tree
     """
     # part 2.1
+    print "\n Part 2.1: "
     # Create all stumps
     stump_list = create_stump(train_data)
 
@@ -139,32 +135,33 @@ def part_two(test_data, train_data):
 
     train_res = train_data[:, 0]
     test_res = test_data[:, 0]
-    for i in range(1,31):
-        stump_list[i-1].print_stump_detailed()
-        train_col = train_data[:, i]
-        test_col = test_data[:, i]
+    i = 1
 
-        print "Feature: " + str(stump_list[i-1].feature)
+    # stump_list[i-1].print_stump_detailed()
+    train_col = train_data[:, i]
+    test_col = test_data[:, i]
 
-        countGood = 0
-        for idx, trc in enumerate(train_col):
-            half_train = calc_data_split(stump_list[i-1].threshold, trc)
-            if train_res[idx] == (stump_list[i-1].predict(half_train)):
-                countGood += 1
+    print "Feature: " + str(stump_list[i-1].feature)
 
-        train_p = str(countGood/len(train_res)*100)
-        train_perc.append(train_p)
-        print "Train Correct Percentage: " + str(train_p)
+    countGood = 0
+    for idx, trc in enumerate(train_col):
+        half_train = calc_data_split(stump_list[i-1].threshold, trc)
+        if train_res[idx] == (stump_list[i-1].predict(half_train)):
+            countGood += 1
 
-        countGood = 0
-        for idx, trc in enumerate(test_col):
-            half_test = calc_data_split(stump_list[i-1].threshold, trc)
-            if test_res[idx] == (stump_list[i-1].predict(half_test)):
-                countGood += 1
+    train_p = str(countGood/len(train_res)*100)
+    train_perc.append(train_p)
+    print "Train Correct Percentage: " + str(train_p)
 
-        test_p = str(countGood/len(test_res)*100)
-        test_perc.append(test_p)
-        print "Test Correct Percentage: " + str(test_p)
+    countGood = 0
+    for idx, trc in enumerate(test_col):
+        half_test = calc_data_split(stump_list[i-1].threshold, trc)
+        if test_res[idx] == (stump_list[i-1].predict(half_test)):
+            countGood += 1
+
+    test_p = str(countGood/len(test_res)*100)
+    test_perc.append(test_p)
+    print "Test Correct Percentage: " + str(test_p)
 
     # part 2.2
     print "\nPart 2.2: "
@@ -234,10 +231,10 @@ def test_split(attribute_index, head, attribute_value):
     head.right.index = attribute_index
     head.right.attributeValue = attribute_value
     for d in head.data:
-        if d[attribute_index] < attribute_value:
-            head.left.data.append(d)
-        else:
+        if d[attribute_index] > attribute_value:
             head.right.data.append(d)
+        else:
+            head.left.data.append(d)
     head.left.data = np.array(head.left.data)
     head.right.data = np.array(head.right.data)
 
@@ -297,7 +294,7 @@ def make_leaf(head):
 # split is the recursive function that splits the current node into two nodes
 # until the specified depth has reached
 def do_split(head, max_depth, depth):
-    print "\nDepth: " + str(depth)
+    # print "\nDepth: " + str(depth)
     # null case
     if head.data is None:
         return None
@@ -326,10 +323,10 @@ def do_split(head, max_depth, depth):
         return
 
     # print "Splitting by index #" + str(target_index[1])
-    print "infogain, split index, split Value: " + str(target_index)
-    print "Head len : " + str(len(head.data)) + " "
-    print "head left: " + str(len(head.left.data)) + " "
-    print "head right: " + str(len(head.right.data)) + " "
+    # print "infogain, split index, split Value: " + str(target_index)
+    # print "Head len : " + str(len(head.data)) + " " + str(head.data[:,0])+ " "+ str(head.data[:,target_index[1]])
+    # print "head left: " + str(len(head.left.data)) + " " + str(head.left.data[:,0]) + " " + str(head.left.data[:,target_index[1]])
+    # print "head right: " + str(len(head.right.data)) + " " + str(head.right.data[:,0])+ str(head.right.data[:,target_index[1]])
 
 
     # go left
@@ -510,7 +507,7 @@ def calc_threshold_theta(data_col, results):
 
     # print "data_res: " + str(data_res)
     if len(data_res) <= 2:
-        return data_res[0][1]
+        return data_res[1][1]
 
     infoGain = []
     prevClass = -999

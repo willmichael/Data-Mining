@@ -1,111 +1,182 @@
+Part 2.2:
+
 Depth: 1
-splitting by index #10
-Info gain: 0
+infogain, split index, split Value: (1.6028631943942884e-07, 12, 0.13737521954689966)
 
 Depth: 2
-splitting by index #5
-Info gain: 0
+infogain, split index, split Value: (9.4070389017320011e-07, 10, 0.22362961345271878)
 
 Depth: 3
-splitting by index #15
-Info gain: 0
+infogain, split index, split Value: (1.4343324378218725e-06, 12, 0.099690966895662439)
 
 Depth: 4
-splitting by index #16
-Info gain: 0
+infogain, split index, split Value: (3.5807891403116798e-06, 15, 0.088418261549444196)
 
 Depth: 5
-splitting by index #9
-Info gain: 0.00141737632099
+infogain, split index, split Value: (0.00048946918702330589, 5, 0.20167915500586814)
+
+Depth: 6
+max depth reached 6
+
+Depth: 6
+max depth reached 6
 
 Depth: 5
-splitting by index #2
-Info gain: 0.5
+infogain, split index, split Value: (1.377438478111781e-05, 9, 0.34363411619283063)
+
+Depth: 6
+max depth reached 6
+
+Depth: 6
+max depth reached 6
 
 Depth: 4
-splitting by index #1
-Info gain: 0.5
+infogain, split index, split Value: (0.00048946918702330589, 10, 0.11137803013758464)
 
 Depth: 5
-splitting by index #1
-Info gain: 0.5
+infogain, split index, split Value: (0.25162916738782293, 2, 0.6212471131639723)
+
+Depth: 6
+max depth reached 6
+
+Depth: 5
+infogain, split index, split Value: (0.0010821659130774153, 9, 0.34487021013597036)
+
+Depth: 6
+max depth reached 6
+
+Depth: 6
+max depth reached 6
 
 Depth: 3
-splitting by index #18
-Info gain: 0
+infogain, split index, split Value: (4.8758986418984129e-06, 5, 0.48632301164575248)
 
 Depth: 4
-splitting by index #25
-Info gain: 0.0157600093314
+infogain, split index, split Value: (2.5979210919180318e-06, 12, 0.066920118277418367)
 
 Depth: 5
-splitting by index #9
-Info gain: 0.00363226083287
+infogain, split index, split Value: (0.00026203343330941098, 12, 0.056493030080704332)
+
+Depth: 6
+max depth reached 6
+
+Depth: 6
+max depth reached 6
 
 Depth: 5
-splitting by index #19
-Info gain: 0
+infogain, split index, split Value: (1.377438478111781e-05, 19, 0.12763644270493588)
+
+Depth: 6
+max depth reached 6
+
+Depth: 6
+max depth reached 6
 
 Depth: 4
-splitting by index #6
-Info gain: 0.0
+infogain, split index, split Value: (0.00048946918702330589, 5, 0.50708675634196987)
 
 Depth: 5
-splitting by index #2
-Info gain: 0.5
+infogain, split index, split Value: (0.25162916738782293, 5, 0.48722578315428372)
+
+Depth: 6
+max depth reached 6
 
 Depth: 5
-splitting by index #5
-Info gain: 0.5
+infogain, split index, split Value: (0.0010821659130774153, 10, 0.35160515396374764)
+
+Depth: 6
+max depth reached 6
+
+Depth: 6
+max depth reached 6
 
 Depth: 2
-splitting by index #18
-Info gain: 0.00177169412569
+infogain, split index, split Value: (9.9080871385215374e-06, 10, 0.428696221882507)
 
 Depth: 3
-splitting by index #19
-Info gain: 0
+infogain, split index, split Value: (3.5568036316213636e-07, 15, 0.13859333038719107)
 
 Depth: 4
-splitting by index #25
-Info gain: 0.0385961201745
+infogain, split index, split Value: (3.5807891403116798e-06, 17, 0.10483870967741936)
 
 Depth: 5
-splitting by index #15
-Info gain: 0.251629167388
+infogain, split index, split Value: (0.00015747013853140146, 10, 0.29416903253985577)
+
+Depth: 6
+max depth reached 6
+
+Depth: 6
+max depth reached 6
 
 Depth: 5
-splitting by index #6
-Info gain: 0.188721875541
+infogain, split index, split Value: (0.00048946918702330589, 2, 0.30669745958429567)
+
+Depth: 6
+max depth reached 6
+
+Depth: 6
+max depth reached 6
 
 Depth: 4
-splitting by index #1
-Info gain: 0.5
+infogain, split index, split Value: (2.5393992969524604e-06, 12, 0.1689455079036884)
 
 Depth: 5
-splitting by index #1
-Info gain: 0.5
+infogain, split index, split Value: (0.00026203343330941098, 10, 0.37147848875300282)
+
+Depth: 6
+max depth reached 6
+
+Depth: 6
+max depth reached 6
+
+Depth: 5
+infogain, split index, split Value: (4.8958762718376292e-06, 2, 0.65404157043879918)
+
+Depth: 6
+max depth reached 6
+
+Depth: 6
+max depth reached 6
 
 Depth: 3
-splitting by index #9
-Info gain: 0
+infogain, split index, split Value: (3.251837565709792e-05, 10, 0.52631578947368418)
 
 Depth: 4
-splitting by index #1
-Info gain: 0.5
+infogain, split index, split Value: (0.00048946918702330589, 5, 0.41699015979055709)
 
 Depth: 5
-splitting by index #1
-Info gain: 0.5
+infogain, split index, split Value: (0.25162916738782293, 5, 0.36345580933465743)
+
+Depth: 6
+max depth reached 6
+
+Depth: 5
+infogain, split index, split Value: (0.0010821659130774153, 2, 0.26605080831408767)
+
+Depth: 6
+max depth reached 6
+
+Depth: 6
+max depth reached 6
 
 Depth: 4
-splitting by index #16
-Info gain: 0.00363226083287
+infogain, split index, split Value: (0.0010821659130774153, 5, 0.65784959826667877)
 
 Depth: 5
-splitting by index #1
-Info gain: 0.5
+infogain, split index, split Value: (0.0032289436203635224, 2, 0.36397228637413392)
+
+Depth: 6
+max depth reached 6
+
+Depth: 6
+max depth reached 6
 
 Depth: 5
-splitting by index #17
-Info gain: 0.251629167388
+infogain, split index, split Value: (0.25162916738782293, 5, 0.76257109325629691)
+
+Depth: 6
+max depth reached 6
+
+Decision tree with depth 6
+Train error: 64.4366197183
+Test error: 60.9154929577
