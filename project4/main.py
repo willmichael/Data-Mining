@@ -132,7 +132,7 @@ def part_3_2():
 
 def importing_data():
     print "Importing Data"
-    data = 'data-1.txt'
+    data = 'data-2.txt'
     data = pd.read_csv(data, header=None)
     dfData = data.values[:,:]
     return dfData
