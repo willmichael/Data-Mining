@@ -90,7 +90,6 @@ def create_clusters(seeds, data):
         idx = distances.index(min(distances))
         clusters[idx].append(point)
 
-    # print "len clusters: " + str(len(clusters)
     for i in range(len(clusters)):
         # print "len clusters " + str(i) + ": " + str(len(clusters[i]))
         if len(clusters[i]) == 0:
@@ -152,8 +151,6 @@ def part_3_1(data):
     ## Replace ci and cj with a single cluster
 
 
-
-
 def do_hac_clustering(all_clusters):
     length = len(all_clusters)
 
@@ -193,6 +190,7 @@ def do_hac_clustering(all_clusters):
         merge_pair = np.unravel_index(cluster_matrix.argmin(), cluster_matrix.shape)
         # merge I and best J into new array of clusters
         print "Merging: " + str(merge_pair)
+        print "Distance: " + str(cluster_matrix.argmin())
         new_cluster = all_clusters[merge_pair[0]] + all_clusters[merge_pair[1]]
         all_clusters.append(new_cluster)
         if merge_pair[0] > merge_pair[1]:
@@ -202,7 +200,6 @@ def do_hac_clustering(all_clusters):
             del all_clusters[merge_pair[1]]
             del all_clusters[merge_pair[0]]
 
-        print "all clusters len: " + str(len(all_clusters))
         length = len(all_clusters)
 
 def part_3_2():
