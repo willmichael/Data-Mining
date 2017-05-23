@@ -81,7 +81,6 @@ def create_clusters(seeds, data):
         idx = distances.index(min(distances))
         clusters[idx].append(point)
     
-    print len(clusters)
     for i in range(len(clusters)):
         if len(clusters[i]) == 0:
             print "cluster empty"
@@ -134,8 +133,8 @@ def part_2_2(data):
         print "Doing K: " + str(k)
         sse = k_means(data, k, 10)
         sse_k.append(sse)
-        plt.plot(sse)
-    
+        line = plt.plot(sse, label="K = "+str(k))
+        plt.legend()
     plt.show()
 
 def part_3_1():
