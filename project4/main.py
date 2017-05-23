@@ -12,11 +12,13 @@ import random
 
 def main():
     data = importing_data()
-    # sse = part_2_1(data)
-    # part_2_2(data)
+    part_2_1(data)
+    part_2_2(data)
+    part_3_1(data)
     part_3_2(data)
 
 def part_2_1(data):
+    print "working on 2.1"
     # implement k means with k = 2
     random.seed()
 
@@ -31,6 +33,7 @@ def part_2_1(data):
     return sse
 
 def part_2_2(data):
+    print "working on 2.2"
     # implement k means with k = range(2,11)
     sse_k = []
     for k in range(2,11):
@@ -137,6 +140,7 @@ def euclideanDistance(instance1, instance2):
     return np.sqrt(distance)
 
 def part_3_1(data):
+    print "DOING PART 3.1"
     # Implement HAC algorithm using single link to measure the distance
     # between clusters
 
@@ -184,7 +188,7 @@ def part_3_1(data):
         # merge I and best J into new array of clusters
         if length < 12:
             print "Merging: " + str(merge_pair)
-            print "Distance: " + str(cluster_matrix.argmax())
+            print "Distance: " + str(cluster_matrix.argmin())
             for i, clus in enumerate(all_clusters):
                 print "Cluster: " + str(i) + " size: " + str(len(clus))
         new_cluster = all_clusters[merge_pair[0]] + all_clusters[merge_pair[1]]
@@ -199,6 +203,7 @@ def part_3_1(data):
         length = len(all_clusters)
 
 def part_3_2(data):
+    print "DOING 3.2"
     # Implement HAC algorithm using complete link to measure the distance
     # between clusters.
 
@@ -210,7 +215,7 @@ def part_3_2(data):
 
     #TODO
     while(length > 0):
-        print " length: " + str(length)
+        print "length: " + str(length)
 
         # for each cluster
         cluster_matrix = [[9999 for x in range(length)] for y in range(length)]
@@ -258,7 +263,6 @@ def part_3_2(data):
             del all_clusters[merge_pair[0]]
 
         length = len(all_clusters)
-
 
 def importing_data():
     print "Importing Data"
