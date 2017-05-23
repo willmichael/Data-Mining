@@ -144,17 +144,10 @@ def part_3_1(data):
     all_clusters = []
     for d in data:
         all_clusters.append([d])
-    # print len(all_clusters)
-    do_hac_clustering(all_clusters)
     # Repeat until there is only one cluster:
     ## Among the current clusters, determine the clusters, ci and cj, that are closest
     ## Replace ci and cj with a single cluster
-
-
-def do_hac_clustering(all_clusters):
     length = len(all_clusters)
-
-    #TODO
     while(length > 0):
         print " length: " + str(length)
 
