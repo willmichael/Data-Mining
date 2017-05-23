@@ -155,7 +155,7 @@ def do_hac_clustering(all_clusters):
     length = len(all_clusters)
 
     #TODO
-    while(length > 10):
+    while(length > 0):
         print " length: " + str(length)
 
         # for each cluster
@@ -184,13 +184,14 @@ def do_hac_clustering(all_clusters):
 
         # find shortest cluster to cluster distance
         # print "cluster distance: " + str(cluster_distances)
-        print "cluster matrix: "
+        # print "cluster matrix: "
         # print cluster_matrix
         cluster_matrix = np.array(cluster_matrix)
         merge_pair = np.unravel_index(cluster_matrix.argmin(), cluster_matrix.shape)
         # merge I and best J into new array of clusters
-        print "Merging: " + str(merge_pair)
-        print "Distance: " + str(cluster_matrix.argmin())
+        if length < 12:
+            print "Merging: " + str(merge_pair)
+            print "Distance: " + str(cluster_matrix.argmin())
         new_cluster = all_clusters[merge_pair[0]] + all_clusters[merge_pair[1]]
         all_clusters.append(new_cluster)
         if merge_pair[0] > merge_pair[1]:
@@ -205,7 +206,57 @@ def do_hac_clustering(all_clusters):
 def part_3_2():
     # Implement HAC algorithm using complete link to measure the distance
     # between clusters.
-    pass
+
+    length = len(all_clusters)
+
+    #TODO
+    while(length > 0):
+        print " length: " + str(length)
+
+        # for each cluster
+        cluster_matrix = [[9999 for x in range(length)] for y in range(length)]
+        for i in range(length):
+            # TODO: implement skip list
+            # compute best max distance from cluster to cluster
+            cluster_distances = []
+            # for each other cluster
+            for j in range(length):
+                # skip self
+                if i == j:
+                    cluster_matrix[i][j] = 999999999999
+                    continue
+
+                element_distances = []
+                # for each element of in cluster I
+                ci_length = len(all_clusters[i])
+                for k in range(ci_length):
+                    # for ci_length elements in cluster J
+                    cj_length = len(all_clusters[j])
+                    for l in range(cj_length):
+                        # calculate distance between ci and cj
+                        element_distances.append( euclideanDistance( all_clusters[i][k], all_clusters[j][l] ) )
+                cluster_matrix[i][j] = max(element_distances)
+
+        # find shortest cluster to cluster distance
+        # print "cluster distance: " + str(cluster_distances)
+        # print "cluster matrix: "
+        # print cluster_matrix
+        cluster_matrix = np.array(cluster_matrix)
+        merge_pair = np.unravel_index(cluster_matrix.argmax(), cluster_matrix.shape)
+        # merge I and best J into new array of clusters
+        if length < 12:
+            print "Merging: " + str(merge_pair)
+            print "Distance: " + str(cluster_matrix.argmax())
+        new_cluster = all_clusters[merge_pair[0]] + all_clusters[merge_pair[1]]
+        all_clusters.append(new_cluster)
+        if merge_pair[0] > merge_pair[1]:
+            del all_clusters[merge_pair[0]]
+            del all_clusters[merge_pair[1]]
+        else:
+            del all_clusters[merge_pair[1]]
+            del all_clusters[merge_pair[0]]
+
+        length = len(all_clusters)
 
 
 def importing_data():
