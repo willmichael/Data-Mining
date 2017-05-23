@@ -12,8 +12,8 @@ import random
 
 def main():
     data = importing_data()
-    # sse = part_2_1(data)
-    part_2_2(data)
+    sse = part_2_1(data)
+    # part_2_2(data)
 
 def part_2_1(data):
     # implement k means with k = 2
