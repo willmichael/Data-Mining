@@ -14,7 +14,7 @@ def main():
     data = importing_data()
     # sse = part_2_1(data)
     # part_2_2(data)
-    part_3_1(data)
+    part_3_2(data)
 
 def part_2_1(data):
     # implement k means with k = 2
@@ -203,9 +203,13 @@ def do_hac_clustering(all_clusters):
 
         length = len(all_clusters)
 
-def part_3_2():
+def part_3_2(data):
     # Implement HAC algorithm using complete link to measure the distance
     # between clusters.
+
+    all_clusters = []
+    for d in data:
+        all_clusters.append([d])
 
     length = len(all_clusters)
 
