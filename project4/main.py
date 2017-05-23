@@ -12,9 +12,8 @@ import random
 
 def main():
     data = importing_data()
-    sse = part_2_1(data)
-    plt.plot(sse)
-    plt.show()
+    # sse = part_2_1(data)
+    part_2_2(data)
 
 def part_2_1(data):
     # implement k means with k = 2
@@ -26,9 +25,10 @@ def part_2_1(data):
     # for each xi to cj such that distance from x is minimized
     # update cluster center
     # until convergence
-    sse = k_means(data,2,4)
+    sse = k_means(data,2,15)
+    plt.plot(sse)
+    plt.show()
     return sse
-
 
 
 def k_means(data, k, iterate):
@@ -65,24 +65,39 @@ def create_clusters(seeds, data):
     # create clusters
     clusters = []
     for i in seeds:
-        clusters.append([])
+        clusters.append([i])
 
     # assign clusters
-    oldlen = 0
     for point in data:
         distances = []
         # calculate distances
         for i,s in enumerate(seeds):
-            distances.append(euclideanDistance(point, s))
+            if np.all(point == s):
+                continue
+            else:
+                distances.append(euclideanDistance(point, s))
 
         # find idx of min distance
         idx = distances.index(min(distances))
         clusters[idx].append(point)
     
+    print len(clusters)
+    for i in range(len(clusters)):
+        if len(clusters[i]) == 0:
+            print "cluster empty"
+            print i
+            print len(seeds)
+            print seeds[i]
+            print len(clusters)
     return clusters
 
 def calc_center(cluster):
     n = len(cluster)
+    if n == 0:
+        print "found 0 cluster"
+        print cluster
+        print n
+        return 0
     row_num = len(cluster[0])
     cluster = np.array(cluster)
 
@@ -112,12 +127,16 @@ def euclideanDistance(instance1, instance2):
         distance += pow((instance1[x] - instance2[x]), 2)
     return np.sqrt(distance)
 
-
-    
-
-def part_2_2():
+def part_2_2(data):
     # implement k means with k = range(2,11)
-    pass
+    sse_k = []
+    for k in range(2,11):
+        print "Doing K: " + str(k)
+        sse = k_means(data, k, 10)
+        sse_k.append(sse)
+        plt.plot(sse)
+    
+    plt.show()
 
 def part_3_1():
     # Implement HAC algorithm using single link to measure the distance
