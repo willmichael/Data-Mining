@@ -227,7 +227,7 @@ def part_3_2(data):
             for j in range(length):
                 # skip self
                 if i == j:
-                    cluster_matrix[i][j] = 999999999999
+                    cluster_matrix[i][j] = 0
                     continue
 
                 element_distances = []
@@ -248,9 +248,11 @@ def part_3_2(data):
         cluster_matrix = np.array(cluster_matrix)
         merge_pair = np.unravel_index(cluster_matrix.argmax(), cluster_matrix.shape)
         # merge I and best J into new array of clusters
-        if length < 12:
-            print "Merging: " + str(merge_pair)
-            print "Distance: " + str(cluster_matrix.argmax())
+        # if length < 12:
+        print "Merging: " + str(merge_pair)
+        print "Distance: " + str(cluster_matrix.argmax())
+        for i, clus in enumerate(all_clusters):
+            print "Cluster: " + str(i) + " size: " + str(len(clus))
         new_cluster = all_clusters[merge_pair[0]] + all_clusters[merge_pair[1]]
         all_clusters.append(new_cluster)
         if merge_pair[0] > merge_pair[1]:
