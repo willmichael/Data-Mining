@@ -13,13 +13,13 @@ import random
 def main():
     data = importing_data()
     # sse = part_2_1(data)
-    part_2_2(data)
+    # part_2_2(data)
+    part_3_1(data)
 
 def part_2_1(data):
     # implement k means with k = 2
     random.seed()
 
-    
     ### algo
     # select k random samples of sampels
     # for each xi to cj such that distance from x is minimized
@@ -30,6 +30,16 @@ def part_2_1(data):
     plt.show()
     return sse
 
+def part_2_2(data):
+    # implement k means with k = range(2,11)
+    sse_k = []
+    for k in range(2,11):
+        print "Doing K: " + str(k)
+        sse = k_means(data, k, 10)
+        sse_k.append(sse)
+        plt.plot(sse)
+
+    plt.show()
 
 def k_means(data, k, iterate):
     # pick seeds
@@ -39,7 +49,7 @@ def k_means(data, k, iterate):
     seeds = []
     for i in seednums:
         seeds.append(data[i])
-    
+
     total_sse = []
 
     for it in range(iterate):
@@ -60,12 +70,11 @@ def k_means(data, k, iterate):
 
     return total_sse
 
-
 def create_clusters(seeds, data):
     # create clusters
     clusters = []
     for i in seeds:
-        clusters.append([i])
+        clusters.append([])
 
     # assign clusters
     for point in data:
@@ -80,9 +89,10 @@ def create_clusters(seeds, data):
         # find idx of min distance
         idx = distances.index(min(distances))
         clusters[idx].append(point)
-    
-    print len(clusters)
+
+    # print "len clusters: " + str(len(clusters)
     for i in range(len(clusters)):
+        # print "len clusters " + str(i) + ": " + str(len(clusters[i]))
         if len(clusters[i]) == 0:
             print "cluster empty"
             print i
@@ -127,21 +137,73 @@ def euclideanDistance(instance1, instance2):
         distance += pow((instance1[x] - instance2[x]), 2)
     return np.sqrt(distance)
 
-def part_2_2(data):
-    # implement k means with k = range(2,11)
-    sse_k = []
-    for k in range(2,11):
-        print "Doing K: " + str(k)
-        sse = k_means(data, k, 10)
-        sse_k.append(sse)
-        plt.plot(sse)
-    
-    plt.show()
-
-def part_3_1():
+def part_3_1(data):
     # Implement HAC algorithm using single link to measure the distance
     # between clusters
-    pass
+
+    # Start with all objects in their own cluster.
+    all_clusters = []
+    for d in data:
+        all_clusters.append([d])
+    # print len(all_clusters)
+    do_hac_clustering(all_clusters)
+    # Repeat until there is only one cluster:
+    ## Among the current clusters, determine the clusters, ci and cj, that are closest
+    ## Replace ci and cj with a single cluster
+
+
+
+
+def do_hac_clustering(all_clusters):
+    length = len(all_clusters)
+
+    #TODO
+    while(length > 10):
+        print " length: " + str(length)
+
+        # for each cluster
+        cluster_matrix = [[9999 for x in range(length)] for y in range(length)]
+        for i in range(length):
+            # TODO: implement skip list
+            # compute best min distance from cluster to cluster
+            cluster_distances = []
+            # for each other cluster
+            for j in range(length):
+                # skip self
+                if i == j:
+                    cluster_matrix[i][j] = 999999999999
+                    continue
+
+                element_distances = []
+                # for each element of in cluster I
+                ci_length = len(all_clusters[i])
+                for k in range(ci_length):
+                    # for ci_length elements in cluster J
+                    cj_length = len(all_clusters[j])
+                    for l in range(cj_length):
+                        # calculate distance between ci and cj
+                        element_distances.append( euclideanDistance( all_clusters[i][k], all_clusters[j][l] ) )
+                cluster_matrix[i][j] = min(element_distances)
+
+        # find shortest cluster to cluster distance
+        # print "cluster distance: " + str(cluster_distances)
+        print "cluster matrix: "
+        # print cluster_matrix
+        cluster_matrix = np.array(cluster_matrix)
+        merge_pair = np.unravel_index(cluster_matrix.argmin(), cluster_matrix.shape)
+        # merge I and best J into new array of clusters
+        print "Merging: " + str(merge_pair)
+        new_cluster = all_clusters[merge_pair[0]] + all_clusters[merge_pair[1]]
+        all_clusters.append(new_cluster)
+        if merge_pair[0] > merge_pair[1]:
+            del all_clusters[merge_pair[0]]
+            del all_clusters[merge_pair[1]]
+        else:
+            del all_clusters[merge_pair[1]]
+            del all_clusters[merge_pair[0]]
+
+        print "all clusters len: " + str(len(all_clusters))
+        length = len(all_clusters)
 
 def part_3_2():
     # Implement HAC algorithm using complete link to measure the distance
