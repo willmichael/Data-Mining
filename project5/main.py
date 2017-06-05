@@ -1,3 +1,7 @@
+# Alex Nguyen, Michael Lee
+# CS434 Machine Learning
+# Spring 2017
+# Homework 5
 
 from __future__ import division
 import numpy as np
@@ -11,12 +15,107 @@ import random
 
 
 def main():
-    (n, m, transitions_matrixes, rewards) =importing_data()
-    print rewards
-    print transitions_matrixes[0]
+    (num_states, num_actions, transitions_matrixes, rewards) = importing_data()
+    # turn str to floats
+    rewards = [float(i) for i in rewards]
+
+    # part 2
+    discount_factor = 0.1
+    (U, P) = value_iteration_algo(num_states,num_actions, discount_factor, transitions_matrixes, rewards)
+    print "U: " + str(U)
+    print "P: " + str(P)
+
+    discount_factor = 0.9
+    (U, P) = value_iteration_algo(num_states,num_actions, discount_factor, transitions_matrixes, rewards)
+    print "U: " + str(U)
+    print "P: " + str(P)
+
+
+def value_iteration_algo(num_states,num_actions, discount_factor, transitions_matrixes, rewards):
+    print "Doing algo ... "
+    # init state, action
+    curr_state = 0
+    U = []
+    step = 0
+    P = []
+    print "discount_factor: " + str(discount_factor)
+
+    # get reward for step 1 on
+    U.append(rewards)
+    while(1):
+        # print "Step " + str(step)
+        # print "U: " + str(U)
+        # print "P: " + str(P)
+        Ui = []
+        policies = []
+        # for each state, find Utility and policies
+        for i in range(num_states):
+            (utility, policy) = calc_utility_for_one_state(num_actions,num_states, discount_factor, transitions_matrixes, rewards, i, U[step])
+            Ui.append(utility)
+            policies.append(policy)
+        U.append(Ui)
+        P.append(policies)
+
+        # check if we need to quit
+        if step > 0:
+            if check_delta(U, step, discount_factor):
+                break
+        step += 1
+
+    # return last U and last P
+    return (U[-1], P[-1])
+
+
+# returns the sum of the future reward for going to target_state
+def calc_utility_for_one_state(num_actions,num_states, discount_factor, transitions_matrix, rewards, current_state, Ui):
+    actions = []
+    # for all actions...
+    for action in range(num_actions):
+        total = 0
+        for target_state in range(num_states):
+            # print "working on state "+ str(current_state) +" going to state " + str(target_state) + " on action " + str(action)
+            prob = transitions_matrix[action][current_state][target_state]
+            expected_reward = Ui[target_state]
+            total += float(prob) * float(expected_reward)
+        actions.append(total)
+        # print "actions: "
+        # print actions
+
+
+    policy = actions.index(max(actions))
+    Rs = rewards[current_state]
+    utility = float(Rs) + float(discount_factor) * max(actions)
+    # print "actions: " + str(actions)
+    # print "policy: " + str(policy)
+    return (utility, policy)
+
+# checks the delta from the current step and the last step for
+# returns true if delta is lower than threshold
+def check_delta(U, step, discount_factor):
+    # we set e to be really small here:
+    e = 0.0000000001
+    # find threshold
+    top = e * ((1-discount_factor) ** 2)
+    bottom = 2 * (discount_factor ** 2)
+    threshold = top / bottom
+
+    # sum diff of deltas from last iteration
+    delta_total = 0.0
+    for i in range(len(U[step])):
+        delta = U[step][i] - U[step-1][i]
+        delta_total += delta
+    # print "delta total: " + str(delta_total)
+    # print "threshold: " + str(threshold)
+
+    # if delta total is less than threshold, return True
+    if delta_total < threshold:
+        return True
+    else:
+        return False
+
 
 def importing_data():
-    print "Importing Data"
+    print "Importing Data..."
     filename = 'test-data-for-MDP-1.txt'
     with open(filename, 'r') as f:
         first_line = f.readline().split()
@@ -36,13 +135,13 @@ def importing_data():
             transitions_matrixes.append(matrix)
             # skip blank line in between:
             f.readline()
-        rewards = f.readline()
+        rewards = f.readline().split()
         ## print debugging
         # for i in transitions_matrixes:
         #     print str(i)
         #     print str(len(i))
         # print len(transitions_matrixes)
-        return(num_states, num_actions, transitions_matrixes, rewards)
+    return(num_states, num_actions, transitions_matrixes, rewards)
 
 if __name__ == '__main__':
     main()
