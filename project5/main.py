@@ -22,11 +22,13 @@ def main():
     # part 2
     discount_factor = 0.1
     (U, P) = value_iteration_algo(num_states,num_actions, discount_factor, transitions_matrixes, rewards)
+    print "Iterations: " + str(len(U))
     print "U: " + str(U)
     print "P: " + str(P)
 
     discount_factor = 0.9
     (U, P) = value_iteration_algo(num_states,num_actions, discount_factor, transitions_matrixes, rewards)
+    print "Iterations: " + str(len(U))
     print "U: " + str(U)
     print "P: " + str(P)
 
@@ -63,6 +65,7 @@ def value_iteration_algo(num_states,num_actions, discount_factor, transitions_ma
         step += 1
 
     # return last U and last P
+    print "U: " + str(U)
     return (U[-1], P[-1])
 
 
@@ -117,6 +120,7 @@ def check_delta(U, step, discount_factor):
 def importing_data():
     print "Importing Data..."
     filename = 'test-data-for-MDP-1.txt'
+    filename = "sample_data.txt"
     with open(filename, 'r') as f:
         first_line = f.readline().split()
         num_states = int(first_line[0]) # n
