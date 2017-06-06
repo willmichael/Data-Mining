@@ -21,25 +21,45 @@ def main():
 
     # part 2
     discount_factor = 0.1
-    (U, P) = value_iteration_algo(num_states,num_actions, discount_factor, transitions_matrixes, rewards)
+    U = value_iteration_algo(num_states,num_actions, discount_factor, transitions_matrixes, rewards)
+    P = calc_policy(num_states, num_actions, transitions_matrixes, U)
     print "Iterations: " + str(len(U))
     print "U: " + str(U)
     print "P: " + str(P)
 
     discount_factor = 0.9
-    (U, P) = value_iteration_algo(num_states,num_actions, discount_factor, transitions_matrixes, rewards)
+    U = value_iteration_algo(num_states,num_actions, discount_factor, transitions_matrixes, rewards)
+    P = calc_policy(num_states, num_actions, transitions_matrixes, U)
     print "Iterations: " + str(len(U))
     print "U: " + str(U)
     print "P: " + str(P)
 
+# calculates optimal policy
+def calc_policy(num_states, num_actions, transitions_matrixes, U):
+    p = []
+    # for each state
+    for current_state in range(num_states):
+        actions = []
+        # for each action
+        for a in range(num_actions):
+            total = 0.0
+            # for each  state calculate summation
+            for target_state in range(num_states):
+                total += float(transitions_matrixes[a][current_state][target_state]) * float(U[target_state])
+            actions.append(total)
+        # for all actions, find the argMax
+        policy = actions.index(max(actions))
+        # add to list of policies
+        p.append(policy)
+    return p
 
+# wrapper for calculation
 def value_iteration_algo(num_states,num_actions, discount_factor, transitions_matrixes, rewards):
-    print "Doing algo ... "
+    print "\nDoing algo ... "
     # init state, action
     curr_state = 0
     U = []
     step = 0
-    P = []
     print "discount_factor: " + str(discount_factor)
 
     # get reward for step 1 on
@@ -52,11 +72,9 @@ def value_iteration_algo(num_states,num_actions, discount_factor, transitions_ma
         policies = []
         # for each state, find Utility and policies
         for i in range(num_states):
-            (utility, policy) = calc_utility_for_one_state(num_actions,num_states, discount_factor, transitions_matrixes, rewards, i, U[step])
+            utility = calc_utility_for_one_state(num_actions,num_states, discount_factor, transitions_matrixes, rewards, i, U[step])
             Ui.append(utility)
-            policies.append(policy)
         U.append(Ui)
-        P.append(policies)
 
         # check if we need to quit
         if step > 0:
@@ -64,17 +82,17 @@ def value_iteration_algo(num_states,num_actions, discount_factor, transitions_ma
                 break
         step += 1
 
-    # return last U and last P
-    print "U: " + str(U)
-    return (U[-1], P[-1])
+    # return last U
+    # print "U: " + str(U)
+    return U[-1]
 
 
 # returns the sum of the future reward for going to target_state
-def calc_utility_for_one_state(num_actions,num_states, discount_factor, transitions_matrix, rewards, current_state, Ui):
+def calc_utility_for_one_state(num_actions, num_states, discount_factor, transitions_matrix, rewards, current_state, Ui):
     actions = []
     # for all actions...
     for action in range(num_actions):
-        total = 0
+        total = 0.0
         for target_state in range(num_states):
             # print "working on state "+ str(current_state) +" going to state " + str(target_state) + " on action " + str(action)
             prob = transitions_matrix[action][current_state][target_state]
@@ -83,14 +101,10 @@ def calc_utility_for_one_state(num_actions,num_states, discount_factor, transiti
         actions.append(total)
         # print "actions: "
         # print actions
-
-
-    policy = actions.index(max(actions))
     Rs = rewards[current_state]
     utility = float(Rs) + float(discount_factor) * max(actions)
     # print "actions: " + str(actions)
-    # print "policy: " + str(policy)
-    return (utility, policy)
+    return utility
 
 # checks the delta from the current step and the last step for
 # returns true if delta is lower than threshold
@@ -120,7 +134,7 @@ def check_delta(U, step, discount_factor):
 def importing_data():
     print "Importing Data..."
     filename = 'test-data-for-MDP-1.txt'
-    filename = "sample_data.txt"
+    # filename = "sample_data.txt"
     with open(filename, 'r') as f:
         first_line = f.readline().split()
         num_states = int(first_line[0]) # n
