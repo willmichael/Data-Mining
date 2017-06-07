@@ -15,16 +15,18 @@ def main():
     # part 2
     discount_factor = 0.1
     U = value_iteration_algo(num_states,num_actions, discount_factor, transitions_matrixes, rewards)
-    P = calc_policy(num_states, num_actions, transitions_matrixes, U)
+    # send last U to calculate policy
+    P = calc_policy(num_states, num_actions, transitions_matrixes, U[-1])
     print "Iterations: " + str(len(U))
-    print "U: " + str(U)
+    print "U: " + str(U[-1])
     print "P: " + str(P)
 
+    # repeat for 0.9
     discount_factor = 0.9
     U = value_iteration_algo(num_states,num_actions, discount_factor, transitions_matrixes, rewards)
-    P = calc_policy(num_states, num_actions, transitions_matrixes, U)
+    P = calc_policy(num_states, num_actions, transitions_matrixes, U[-1])
     print "Iterations: " + str(len(U))
-    print "U: " + str(U)
+    print "U: " + str(U[-1])
     print "P: " + str(P)
 
 # calculates optimal policy
@@ -77,7 +79,7 @@ def value_iteration_algo(num_states,num_actions, discount_factor, transitions_ma
 
     # return last U
     # print "U: " + str(U)
-    return U[-1]
+    return U
 
 
 # returns the sum of the future reward for going to target_state
