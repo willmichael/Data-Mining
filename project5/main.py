@@ -3,13 +3,6 @@
 # Spring 2017
 # Homework 5
 
-from __future__ import division
-import numpy as np
-import pandas as pd
-import matplotlib.pyplot as plt
-import math
-import random
-
 # TODO: input,work, output
 # TODO: ^ make a more descriptive todo
 
