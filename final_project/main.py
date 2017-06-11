@@ -9,6 +9,7 @@ import re
 from string import punctuation
 from keras.preprocessing.text import Tokenizer
 from keras.preprocessing.sequence import pad_sequences
+from keras.models import Model
 from keras.layers import Dense, Input, LSTM, Embedding, Dropout, Activation
 from gensim.models import KeyedVectors
 from keras.layers.merge import concatenate
@@ -34,10 +35,11 @@ re_weight = True
 act = 'relu'
 STAMP = 'lstm_%d_%d_%.2f_%.2f'%(num_lstm, num_dense, rate_drop_lstm, \
         rate_drop_dense)
+EPOCHS = 20
 
 def main():
     # import data
-    train_x, train_y, test_x = importing_data()
+    train_x, train_y, test_x, test_ids = importing_data()
     # tokenize data and sequencize it
     train_seq_1, train_seq_2, test_seq_1, test_seq_2, word_index = tokenize(train_x, test_x, MAX_NB_WORDS)
 
@@ -48,9 +50,12 @@ def main():
     labels = np.array(train_y)
     test_data_1 = pad_sequences(test_seq_1, maxlen=MAX_SEQUENCE_LENGTH)
     test_data_2 = pad_sequences(test_seq_2, maxlen=MAX_SEQUENCE_LENGTH)
-    print('Shape of data tensor:', data_1.shape)
-    print('Shape of label tensor:', labels.shape)
+    test_ids = np.array(test_ids)
 
+    print('Shape of train data tensor:', data_1.shape)
+    print('Shape of train label tensor:', labels.shape)
+    print('Shape of test data tensor:', test_data_1.shape)
+    print('Shape of train label tensor:', test_ids.shape)
     # word2Vec data
     print('Preparing embedding matrix')
     word2vec = KeyedVectors.load_word2vec_format(EMBEDDING_FILE, \
@@ -60,10 +65,14 @@ def main():
     nb_words = min(MAX_NB_WORDS, len(word_index))+1
     embedding_matrix = np.zeros((nb_words, EMBEDDING_DIM))
     for word, i in word_index.items():
+        print "word: " + str(word)
         if word in word2vec.vocab:
+            print "word2vec word vec: " + str(word2vec.word_vec(word))
             embedding_matrix[i] = word2vec.word_vec(word)
     print('Null word embeddings: %d' % np.sum(np.sum(embedding_matrix, axis=1) == 0))
 
+    print "Embedding matrix: "
+    print embedding_matrix
 
     ########################################
     ## sample train/validation data
@@ -71,6 +80,9 @@ def main():
     perm = np.random.permutation(len(data_1))
     idx_train = perm[:int(len(data_1)*(1-VALIDATION_SPLIT))]
     idx_val = perm[int(len(data_1)*(1-VALIDATION_SPLIT)):]
+    print "idx train: " + str(idx_train)
+    print "idx val : " + str(idx_val)
+
 
     data_1_train = np.vstack((data_1[idx_train], data_2[idx_train]))
     data_2_train = np.vstack((data_2[idx_train], data_1[idx_train]))
@@ -138,7 +150,7 @@ def main():
 
     hist = model.fit([data_1_train, data_2_train], labels_train, \
             validation_data=([data_1_val, data_2_val], labels_val, weight_val), \
-            epochs=200, batch_size=2048, shuffle=True, \
+            epochs=EPOCHS, batch_size=2048, shuffle=True, \
             class_weight=class_weight, callbacks=[early_stopping, model_checkpoint])
 
     model.load_weights(bst_model_path)
@@ -152,6 +164,10 @@ def main():
     preds = model.predict([test_data_1, test_data_2], batch_size=8192, verbose=1)
     preds += model.predict([test_data_2, test_data_1], batch_size=8192, verbose=1)
     preds /= 2
+
+
+    print "Test id shape: " + str(len(test_ids))
+    print "preds shape: " + str(preds.shape)
 
     submission = pd.DataFrame({'test_id':test_ids, 'is_duplicate':preds.ravel()})
     submission.to_csv('%.4f_'%(bst_val_score)+STAMP+'.csv', index=False)
@@ -283,10 +299,11 @@ def importing_data():
     data = pd.read_csv(test_file, header=0)
     test_data_1 = []
     test_data_2 = []
-    test_data_y = []
+    test_ids = []
     for index, row in data.iterrows():
         test_data_1.append(text_to_wordlist(row[1]))
         test_data_2.append(text_to_wordlist(row[2]))
+        test_ids.append(row[0])
     test_data_x = zip(test_data_1, test_data_2)
 
     # print "train_data x: " + str(train_data_x)
@@ -295,7 +312,7 @@ def importing_data():
     print "Finished importing data"
     print ("There are %s training samples." % len(train_data_x))
     print ("There are %s test samples." % len(test_data_x))
-    return (train_data_x, train_data_y, test_data_x)
+    return (train_data_x, train_data_y, test_data_x, test_ids)
 
 if __name__ == '__main__':
     main()
