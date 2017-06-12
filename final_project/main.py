@@ -20,7 +20,7 @@ from keras.callbacks import EarlyStopping, ModelCheckpoint
 # TODO: input,work, output
 # TODO: ^ make a more descriptive todo
 
-MAX_NB_WORDS = 20000
+MAX_NB_WORDS = 100000
 MAX_SEQUENCE_LENGTH = 50
 EMBEDDING_DIM = 300
 EMBEDDING_FILE = "GoogleNews-vectors-negative300.bin"
@@ -183,8 +183,14 @@ stop_words = ['the','a','an','and','but','if','or','because','as','what',
 
 def text_to_wordlist(text, remove_stop_words=True, stem_words=False):
     # Clean the text, with the option to remove stop_words and to stem words.
+    # print "text: " + str(text)
 
-    # Clean the text
+    if pd.isnull(text):
+		text = ""
+	
+    if text == "":
+		return	
+       # Clean the text
     text = re.sub(r"[^A-Za-z0-9]", " ", text)
     text = re.sub(r"what's", "", text)
     text = re.sub(r"What's", "", text)
@@ -265,16 +271,25 @@ def tokenize(train_x, test_x, MAX_NB_WORDS):
     train_2 = [x[1] for x in train_x]
     test_1 = [x[0] for x in test_x]
     test_2 = [x[1] for x in test_x]
+    if train_1 is None:
+    	train_1 = []
+    if train_2 is None:
+    	train_2 = []
+    if test_1 is None:
+    	test_1 = []	
+    if test_2 is None:
+    	test_2 = []
+
     tokenizer = Tokenizer(num_words=MAX_NB_WORDS)
     tokenizer.fit_on_texts(train_1 + train_2 + test_1 + test_2)
+    word_index = tokenizer.word_index
+    print 'Found %s unique tokens' % len(word_index)
 
     sequences_1 = tokenizer.texts_to_sequences(train_1)
     sequences_2 = tokenizer.texts_to_sequences(train_2)
     test_sequences_1 = tokenizer.texts_to_sequences(test_1)
     test_sequences_2 = tokenizer.texts_to_sequences(test_2)
 
-    word_index = tokenizer.word_index
-    print 'Found %s unique tokens' % len(word_index)
     return (sequences_1, sequences_2, test_sequences_1, test_sequences_2, word_index)
 
 
@@ -316,3 +331,4 @@ def importing_data():
 
 if __name__ == '__main__':
     main()
+
